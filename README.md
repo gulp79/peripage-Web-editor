@@ -1,86 +1,117 @@
-# PeriPage A6 web editor
+# PeriPage A6 Web Editor
 
-A single-file editor that composes a receipt in the browser and prints it straight to a
-PeriPage thermal printer over **Web Bluetooth**. No server, no app, no driver.
+A single-file browser application that composes a receipt and prints it straight to a
+PeriPage A6 or A6 Mini thermal printer over **Web Bluetooth**. No native app, no driver,
+no installation.
 
-    ./start.sh          # http://localhost:8765
-    npm run deploy      # → https://peripage.baln.tools
+The application is a static web page (`public/index.html`) that must be served over
+**HTTPS** from a web server. It connects directly from the browser to the printer via
+BLE GATT — the server only delivers the page and plays no role in Bluetooth communication.
 
-`file://` will not work — Chrome only exposes `navigator.bluetooth` on `https://` or
-`http://localhost`. That is also why the Cloudflare deploy matters: it is the only way to
-drive the printer from a phone, since a LAN address like `http://192.168.1.5:8765` is not a
-secure context and the browser will hide Bluetooth entirely.
+## Requirements
 
-## Deploying to Cloudflare
+### Browser
 
-Static assets on a Worker, configured in `wrangler.jsonc`. There is no server-side code;
-the Worker only serves `public/`.
+Web Bluetooth is available only in Chromium-based browsers (Chrome, Edge) on supported
+platforms. Safari and Firefox do not implement the API and cannot use this application.
 
-    npx wrangler login      # once, opens a browser
-    npm run deploy
+| Platform | Status |
+|---|---|
+| Chrome / Edge, Windows, macOS | Works out of the box |
+| Chrome, Android | Works — natural pairing for a pocket printer; page must be on HTTPS |
+| Chrome, Linux | Works when BlueZ 5.41+ is present. Older builds may need `chrome://flags/#enable-experimental-web-platform-features` |
+| Safari, Firefox | No Web Bluetooth — not supported |
 
-`npx wrangler deploy --dry-run` validates the config without touching the account.
+### Secure context
 
-### Custom domains
+`file://` does not work. Chrome exposes `navigator.bluetooth` only on `https://` or
+`http://localhost`. A plain LAN address such as `http://192.168.1.5` is not a secure
+context — the browser hides Bluetooth entirely at that origin with no error message.
 
-Live at **https://peripage.baln.tools** and **https://peripage.baln.me**, with the original
-`peripage-editor.<subdomain>.workers.dev` URL still working alongside them.
+This means:
 
-⚠️ **Turn on “Always Use HTTPS”** for each zone (Cloudflare dashboard → SSL/TLS → Edge
-Certificates). All three hostnames currently answer plain `http://` with a 200 instead of
-redirecting. That is normally cosmetic, but not here: Web Bluetooth is hidden entirely on an
-insecure origin, so anyone landing on the `http://` URL sees an editor whose Connect button
-cannot work, with no explanation. Browsers often upgrade the request themselves, which makes
-the failure intermittent and confusing rather than obvious.
+- **Development:** serve from `localhost` with the command below.
+- **Production:** serve from a domain with a valid TLS certificate.
 
-Domains are declared in `wrangler.jsonc` under `routes` with `custom_domain: true`.
-Cloudflare creates the DNS record and issues the certificate itself.
+## Deployment
 
-One trap worth knowing: **adding any route silently disables workers.dev** unless you also
-set `"workers_dev": true`. The first deploy after adding a custom domain took the old URL
-offline with only a warning, so that flag is now explicit in the config.
+The repository contains only static files. Copy the contents of `public/` to any HTTPS
+web server.
 
-To add another domain, the zone must already be in the same Cloudflare account, otherwise
-the deploy fails with `Can't infer zone from route [code: 10082]`. For a domain registered
-elsewhere:
+### Nginx example
 
-1. Cloudflare dashboard → **Add a site** → enter the domain.
-2. Replace the registrar's nameservers with the Cloudflare pair it gives you.
-3. Wait for the zone to go active, usually minutes.
-4. Add the pattern to `routes` in `wrangler.jsonc` and deploy.
+```nginx
+server {
+    listen 80;
+    listen [::]:80;
+    server_name peripage.example.com;
+    return 301 https://$host$request_uri;
+}
 
-### Continuous deployment
+server {
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+    server_name peripage.example.com;
 
-Pushing to `main` deploys, via `.github/workflows/deploy.yml`. Every push and pull request
-first runs a verify job that extracts the inline script from `public/index.html` and parses
-it with `node --check`, then validates the Worker config with a dry run. The whole app is one
-HTML file with a large inline script, so a syntax error would otherwise deploy cleanly and
-only fail in the browser.
+    ssl_certificate     /etc/letsencrypt/live/peripage.example.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/peripage.example.com/privkey.pem;
 
-Two repository secrets are required. Create a Cloudflare API token at
-**dash.cloudflare.com/profile/api-tokens** using the *Edit Cloudflare Workers* template, then:
+    root /var/www/peripage;
+    index index.html;
 
-    gh secret set CLOUDFLARE_API_TOKEN     # paste the token when prompted
-    gh secret set CLOUDFLARE_ACCOUNT_ID    # paste your account id
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+}
+```
 
-Both commands prompt for the value, so nothing sensitive lands in your shell history. Until
-they are set, the deploy job finishes green with a warning instead of failing, so the repo is
-never in a broken-looking state. Local `npm run deploy` keeps working regardless.
-The site is public once deployed. It holds no secrets and no printer data — layouts live
-only in the browser's `localStorage` — but put Cloudflare Access in front of it if you would
-rather it not be world-readable.
+Place `public/index.html` in `/var/www/peripage/` and reload Nginx.
+HTTPS is mandatory — without it the Connect button cannot function.
+
+### Local development
+
+No build step or package manager is required.
+
+```powershell
+# Windows
+py -m http.server 8765 --bind 127.0.0.1 --directory public
+```
+
+```bash
+# macOS / Linux
+python3 -m http.server 8765 --bind 127.0.0.1 --directory public
+```
+
+Open `http://localhost:8765/` in Chrome or Edge.
+
+### Syntax check
+
+After editing the inline JavaScript, extract and parse it with:
+
+```bash
+python3 - <<'PY'
+from pathlib import Path
+import re
+html = Path('public/index.html').read_text(encoding='utf-8')
+scripts = re.findall(r'<script(?:\s[^>]*)?>(.*?)</script>', html, flags=re.S | re.I)
+inline = [s for s in scripts if s.strip()]
+Path('/tmp/peripage-inline.js').write_text('\n'.join(inline), encoding='utf-8')
+print(f'extracted {len(inline)} inline script block(s)')
+PY
+node --check /tmp/peripage-inline.js
+```
 
 ## Blocks
 
 Text (font, size, weight, alignment, tracking, line height, inverted white-on-black),
-image, QR code, barcode, divider, spacer and **gift tag**.
+image, QR code, barcode, divider, spacer, and **gift tag**.
 
 **Gift tag** is a framed name card for presents: a To line, a message, a From line, an
 ornament, and a border. Twelve borders in two moods — classy (single, double, thick + thin,
 dotted, deco corners) and funky (dashed, ticket stub with punched notches, scallops, zigzag,
 wave, stars). Borders are painted as geometry directly on the dot grid rather than assembled
 from font glyphs, so they stay sharp at 203 dpi and scale with the border weight. Type
-hierarchy is derived from one size control: labels, names and message sizes are computed
+hierarchy is derived from one size control: labels, names, and message sizes are computed
 from it so a tag stays balanced whatever you set.
 
 **Fonts.** 32 faces in eight groups: heavy display, funky, pixel and retro, handwriting,
@@ -91,17 +122,16 @@ has not arrived yet renders as a silent fallback and would bake the wrong glyphs
 raster.
 
 **Emoji.** A searchable picker with nine categories inserts at the caret. Emoji are rendered
-through **Noto Emoji**, the monochrome face, not the colour one. This matters: colour emoji
-thresholded to 1-bit collapse into unreadable blobs, whereas the monochrome glyphs are line
-art that prints cleanly. The picker grid itself uses the same face, so what you pick is what
-prints. Blocks start collapsed as one-line rows, so a long document stays scannable and unwanted
-blocks are easy to spot and delete. A block you have just added opens automatically. Drag
-the grip at the left of any row to reorder, or use the arrow buttons for precision.
+through **Noto Emoji**, the monochrome face, not the colour one. Colour emoji thresholded to
+1-bit collapse into unreadable blobs, whereas the monochrome glyphs are line art that prints
+cleanly. The picker grid uses the same face, so what you pick is what prints.
 
-Reordering uses pointer events rather than HTML5 drag-and-drop, because HTML5 dragging never
-fires on a touch screen and this page is meant to work from a phone. The list auto-scrolls
-when you drag near its top or bottom edge. Save/load the
-layout to `localStorage`, export the composition as PNG.
+Blocks start collapsed as one-line rows, so a long document stays scannable. A block you
+have just added opens automatically. Drag the grip at the left of any row to reorder, or use
+the arrow buttons for precision. Reordering uses pointer events rather than HTML5
+drag-and-drop, because HTML5 dragging never fires on a touch screen.
+
+Save and load the layout to `localStorage`; export the composition as PNG.
 
 Everything is composited to a 1-bit buffer at the printer's native resolution, so the
 on-screen preview is exactly the dot pattern that gets sent.
@@ -110,58 +140,47 @@ on-screen preview is exactly the dot pattern that gets sent.
 - **Images** get their own halftone: Floyd–Steinberg, Atkinson, ordered 8×8 Bayer, or a
   plain threshold, with brightness/contrast/invert.
 - **QR codes** snap to an integer number of printer dots per module and are centred on
-  the dot grid, which matters for scan reliability on 203 dpi paper.
+  the dot grid, which matters for scan reliability at 203 dpi.
 
 ## Wire protocol
 
 Raster data is standard ESC/POS `GS v 0`, wrapped in PeriPage's own reset and density
 commands. Derived from `bitrate16/peripage-python`.
 
-| Purpose            | Bytes                                                   |
-|--------------------|---------------------------------------------------------|
-| Reset              | `10 ff fe 01` + twelve `00`                              |
-| Darkness           | `10 ff 10 00 0n`  (n = 0 light, 1 normal, 2 dark)        |
-| Raster block       | `1d 76 30 00 xL xH yL yH` + rows                         |
-| Feed paper         | `1b 4a nn`  (nn = dot rows)                              |
+| Purpose | Bytes |
+|---|---|
+| Reset | `10 ff fe 01` + twelve `00` |
+| Darkness | `10 ff 10 00 0n`  (n = 0 light, 1 normal, 2 dark) |
+| Raster block | `1d 76 30 00 xL xH yL yH` + rows |
+| Feed paper | `1b 4a nn`  (nn = dot rows) |
 
 `xL/xH` is bytes per row (48 for a 384-dot A6), `yL/yH` is the row count in that block,
 capped at 255. Rows are MSB-first, 1 = black dot.
 
-Framing follows the reference driver exactly, which matters more than it looks:
+Framing follows the reference driver exactly:
 
 - a **reset before every raster block**, not once per job;
-- in the default **row by row** transfer mode, one write per row, so a write never
-  straddles a row boundary. The reference relies on this and packet-based links do not
-  forgive it the way a stream socket would. **Bulk packets** mode streams the whole block
-  instead, which is faster where the printer tolerates it.
+- in the default **row-by-row** transfer mode, one write per row, so a write never
+  straddles a row boundary. **Bulk packets** mode streams the whole block instead, which
+  is faster where the printer tolerates it.
 
-A verified transcript for three rows per block looks like:
+A verified transcript for three rows per block:
 
-    10ff100001                        density
-    10fffe01 000000000000000000000000 reset
-    1d76300030000300                  block: 48 bytes/row, 3 rows
-    <48 bytes> <48 bytes> <48 bytes>  one write per row
-    …                                 reset + preamble + rows, per block
-    1b4a50                            feed
-
-## When it connects but nothing prints
-
-Writing to the wrong characteristic almost always succeeds silently, so the log cannot
-tell you it went nowhere. Press **Probe every characteristic**. It prints a numbered line
-through each writable characteristic in turn. Whichever number appears on paper identifies
-the right one, which you then select from the dropdown.
-
-Auto-selection scores candidates rather than taking the first match, strongly preferring
-known printer services and refusing to land on housekeeping services like battery or
-device information. If nothing scores, the log says so instead of pretending.
+```
+10ff100001                        density
+10fffe01 000000000000000000000000 reset
+1d76300030000300                  block: 48 bytes/row, 3 rows
+<48 bytes> <48 bytes> <48 bytes>  one write per row
+…                                 reset + preamble + rows, per block
+1b4a50                            feed
+```
 
 ## Connecting
 
 Press **Connect**. The app enumerates every GATT service it is allowed to see, logs each
-characteristic with its properties, auto-selects a known write characteristic
-(`ff02`, `2af1`, `ae01`, Nordic UART, Microchip transparent UART…) and subscribes to a
-notify characteristic if one exists. If printing does nothing, pick a different write
-characteristic from the dropdown — the log shows what the printer actually offers.
+characteristic with its properties, and auto-selects a known write characteristic
+(`ff02`, `2af1`, `ae01`, Nordic UART, Microchip transparent UART…). It also subscribes to
+a notify characteristic if one exists.
 
 Switch the device filter to **All Bluetooth devices** if the printer does not advertise a
 `PeriPage`/`PPG` name prefix.
@@ -169,14 +188,16 @@ Switch the device filter to **All Bluetooth devices** if the printer does not ad
 ### If no writable characteristic appears
 
 Some PeriPage units expose only Bluetooth Classic SPP/RFCOMM. Web Bluetooth speaks GATT
-only and cannot reach those, and no browser workaround exists. In that case the printer
-needs a native bridge instead.
+only and cannot reach those — no browser workaround exists. In that case the printer needs
+a native application or bridge.
 
-## Browser support
+## When it connects but nothing prints
 
-| Platform                | Status                                                          |
-|-------------------------|-----------------------------------------------------------------|
-| Chrome / Edge, Windows, macOS | Works out of the box                                      |
-| Chrome, Android         | Works — the natural pairing for a pocket printer, but the page must be on HTTPS |
-| Chrome, Linux           | Works on this desktop (verified, adapter present). Older builds or a distro without BlueZ 5.41+ may need `chrome://flags/#enable-experimental-web-platform-features` |
-| Safari, Firefox         | No Web Bluetooth at all                                          |
+Writing to the wrong characteristic almost always succeeds silently, so the log cannot tell
+you it went nowhere. Press **Probe every characteristic**. It prints a numbered line through
+each writable characteristic in turn. Whichever number appears on paper identifies the right
+one, which you then select from the dropdown.
+
+Auto-selection scores candidates rather than taking the first match, strongly preferring
+known printer services and refusing to land on housekeeping services like battery or device
+information. If nothing scores, the log says so instead of pretending.
