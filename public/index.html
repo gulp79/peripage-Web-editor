@@ -1,144 +1,166 @@
 <!doctype html>
-<html lang="en">
+<html class="dark h-full" lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>PeriPage A6 Web Editor</title>
+<title>PeriPage Studio · Modern Web Bluetooth Thermal Editor</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Bebas+Neue&family=Bungee&family=Bungee+Shade&family=Monoton&family=Righteous&family=Rubik+Mono+One&family=Archivo+Black&family=Titan+One&family=Alfa+Slab+One&family=Press+Start+2P&family=Silkscreen&family=VT323&family=Permanent+Marker&family=Caveat:wght@400;700&family=Rock+Salt&family=Gloria+Hallelujah&family=Shadows+Into+Light&family=Lobster&family=Pacifico&family=Special+Elite&family=Courier+Prime:wght@400;700&family=UnifrakturMaguntia&family=Creepster&family=Nosifer&family=Playfair+Display:wght@400;700&family=Cinzel:wght@400;700&family=Orbitron:wght@400;700&family=Major+Mono+Display&family=Noto+Emoji&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Anton&family=Bebas+Neue&family=Bungee&family=Bungee+Shade&family=Monoton&family=Righteous&family=Rubik+Mono+One&family=Archivo+Black&family=Titan+One&family=Alfa+Slab+One&family=Press+Start+2P&family=Silkscreen&family=VT323&family=Permanent+Marker&family=Caveat:wght@400;700&family=Rock+Salt&family=Gloria+Hallelujah&family=Shadows+Into+Light&family=Lobster&family=Pacifico&family=Special+Elite&family=Courier+Prime:wght@400;700&family=UnifrakturMaguntia&family=Creepster&family=Nosifer&family=Playfair+Display:wght@400;700&family=Cinzel:wght@400;700&family=Orbitron:wght@400;700&family=Major+Mono+Display&family=Black+Ops+One&family=Noto+Emoji&display=swap">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jsbarcode/3.11.6/JsBarcode.all.min.js"></script>
 <style>
 :root{
-  --bg:#0f1115; --panel:#171a21; --panel2:#1e222b; --line:#2a2f3a;
-  --tx:#e6e9ef; --tx2:#9aa3b2; --acc:#5b9cff; --acc2:#7c5cff;
-  --ok:#3ecf8e; --warn:#ffb020; --err:#ff5d5d; --radius:10px;
+  --bg:#0B0D12; --surface:#11141C; --card:#161A24; --panel:#161A24; --panel2:#1E2433; --line:#1E2433;
+  --tx:#F8FAFC; --tx2:#94A3B8; --acc:#3B82F6; --acc2:#2563EB;
+  --ok:#10B981; --warn:#F59E0B; --err:#EF4444; --radius:8px;
 }
 *{box-sizing:border-box}
 html,body{height:100%}
 body{
   margin:0; background:var(--bg); color:var(--tx);
-  font:13px/1.45 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  font:13px/1.45 Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   overflow:hidden;
 }
 button,input,select,textarea{font:inherit;color:inherit}
 button{
   background:var(--panel2); border:1px solid var(--line); color:var(--tx);
-  padding:6px 10px; border-radius:8px; cursor:pointer;
+  padding:6px 10px; border-radius:6px; cursor:pointer; transition:all .15s ease;
 }
-button:hover{border-color:#3c4453; background:#252a35}
+button:hover{border-color:#3B82F6; background:#222838}
 button:disabled{opacity:.45; cursor:not-allowed}
-button.primary{background:linear-gradient(180deg,var(--acc),#3f7ce0); border-color:#3f7ce0; color:#fff; font-weight:600}
+button.primary{background:linear-gradient(180deg,#3B82F6,#2563EB); border-color:#2563EB; color:#fff; font-weight:600; box-shadow:0 0 15px -3px rgba(59,130,246,0.4)}
 button.primary:hover{filter:brightness(1.08)}
 button.ghost{background:transparent}
 button.danger:hover{border-color:var(--err); color:var(--err)}
-button.mini{padding:2px 7px; font-size:12px; border-radius:6px}
+button.mini{padding:3px 8px; font-size:11px; border-radius:5px}
 input[type=text],input[type=number],select,textarea{
-  background:#0d1016; border:1px solid var(--line); border-radius:7px; padding:5px 7px; width:100%;
+  background:#0B0D12; border:1px solid var(--line); border-radius:6px; padding:6px 9px; width:100%; color:#fff;
 }
-input:focus,select:focus,textarea:focus{outline:none; border-color:var(--acc)}
-textarea{resize:vertical; min-height:64px; font-family:ui-monospace,Menlo,Consolas,monospace}
+input:focus,select:focus,textarea:focus{outline:none; border-color:var(--acc); box-shadow:0 0 0 1px rgba(59,130,246,0.3)}
+textarea{resize:vertical; min-height:64px; font-family:JetBrains Mono,ui-monospace,Menlo,Consolas,monospace}
 input[type=range]{width:100%; accent-color:var(--acc)}
 input[type=checkbox]{accent-color:var(--acc); width:14px; height:14px}
-label{color:var(--tx2); font-size:11.5px; display:block; margin-bottom:3px; letter-spacing:.02em}
+label{color:var(--tx2); font-size:11px; display:block; margin-bottom:4px; font-weight:500; letter-spacing:.02em}
 
-#app{display:grid; grid-template-columns:300px 1fr 296px; height:100vh}
-.col{height:100vh; overflow:auto; background:var(--panel); display:flex; flex-direction:column}
+#app{display:grid; grid-template-columns:310px 1fr 330px; height:100vh}
+.col{height:100vh; overflow:auto; background:var(--surface); display:flex; flex-direction:column}
 .col.left{border-right:1px solid var(--line)}
 .col.right{border-left:1px solid var(--line)}
-.center{display:flex; flex-direction:column; background:var(--bg); overflow:hidden}
+.center{display:flex; flex-direction:column; background:var(--bg); overflow:hidden; position:relative}
 
-.hdr{padding:12px 14px; border-bottom:1px solid var(--line); display:flex; align-items:center; gap:8px; flex:0 0 auto}
-.hdr h1{font-size:14px; margin:0; letter-spacing:.01em}
-.hdr .dot{width:8px;height:8px;border-radius:50%;background:var(--err);box-shadow:0 0 0 3px rgba(255,93,93,.15)}
-.hdr .dot.on{background:var(--ok);box-shadow:0 0 0 3px rgba(62,207,142,.15)}
+.hdr{padding:12px 16px; border-bottom:1px solid var(--line); display:flex; align-items:center; gap:10px; flex:0 0 auto; background:rgba(17,20,28,0.9); backdrop-filter:blur(8px)}
+.hdr h1{font-size:14px; margin:0; letter-spacing:-0.01em; font-weight:600; color:#fff}
+.hdr .dot{width:8px;height:8px;border-radius:50%;background:var(--err);box-shadow:0 0 0 3px rgba(239,68,68,.15)}
+.hdr .dot.on{background:var(--ok);box-shadow:0 0 0 3px rgba(16,185,129,.25)}
 .sec{padding:12px 14px; border-bottom:1px solid var(--line)}
-.sec h2{font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--tx2); margin:0 0 9px}
+.sec h2{font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--tx2); margin:0 0 9px; font-weight:600}
 .row{display:flex; gap:7px; align-items:center}
 .row>*{min-width:0}
 .grid2{display:grid; grid-template-columns:1fr 1fr; gap:8px}
 .grid3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px}
-.f{margin-bottom:9px}
+.f{margin-bottom:10px}
 .f:last-child{margin-bottom:0}
-.hint{color:var(--tx2); font-size:11px; line-height:1.4}
+.hint{color:var(--tx2); font-size:10.5px; line-height:1.4}
 .spacer{flex:1}
 
-.addbar{display:grid; grid-template-columns:1fr 1fr; gap:7px}
-.addbar button{display:flex; align-items:center; justify-content:center; gap:6px; padding:9px 6px}
+.addbar{display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px}
+.addbar button{display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; padding:8px 4px; font-size:11px; font-weight:500; background:var(--card); border:1px solid var(--line)}
+.addbar button:hover{background:var(--panel2); border-color:#3B82F6}
 
 #list{padding:10px 12px; display:flex; flex-direction:column; gap:8px}
-.item{background:var(--panel2); border:1px solid var(--line); border-radius:var(--radius); overflow:hidden}
-.item.sel{border-color:var(--acc); box-shadow:0 0 0 1px rgba(91,156,255,.25)}
-.item .top{display:flex; align-items:center; gap:6px; padding:8px 8px; cursor:pointer;
-  user-select:none; -webkit-user-select:none}
-.handle{cursor:grab; color:#5f6b7f; font-size:13px; line-height:1; letter-spacing:-1px;
+.item{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); overflow:hidden; transition:border-color .15s}
+.item.sel{border-color:var(--acc); box-shadow:0 0 0 1px rgba(59,130,246,0.25)}
+.item .top{display:flex; align-items:center; gap:6px; padding:8px 10px; cursor:pointer;
+  user-select:none; -webkit-user-select:none; background:rgba(22,26,36,0.5)}
+.handle{cursor:grab; color:#64748B; font-size:13px; line-height:1; letter-spacing:-1px;
   padding:2px 1px; touch-action:none; flex:0 0 auto}
-.handle:hover{color:var(--acc)}
+.handle:hover{color:var(--tx)}
 .handle:active{cursor:grabbing}
 .chev{color:var(--tx2); font-size:9px; width:9px; flex:0 0 auto}
-.item.dragging{opacity:.55; border-color:var(--acc); box-shadow:0 8px 24px rgba(0,0,0,.5)}
+.item.dragging{opacity:.55; border-color:var(--acc); box-shadow:0 8px 24px rgba(0,0,0,.6)}
 #list.dragging-active .item:not(.dragging){transition:transform .12s}
-.item .kind{font-size:10px; text-transform:uppercase; letter-spacing:.07em; color:#0f1115;
-  background:var(--tx2); border-radius:4px; padding:1px 5px; font-weight:700}
-.item.t-text .kind{background:#6ea8ff}
-.item.t-image .kind{background:#7c5cff; color:#fff}
-.item.t-qr .kind{background:#3ecf8e}
-.item.t-barcode .kind{background:#ffb020}
-.item.t-rule .kind,.item.t-space .kind{background:#7a8496; color:#fff}
-.item.t-card .kind{background:#ff7ac6; color:#241019}
-.item .ttl{flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:var(--tx2); font-size:12px}
-.item .body{padding:0 9px 10px; border-top:1px solid var(--line); padding-top:9px}
+.item .kind{font-size:9.5px; text-transform:uppercase; letter-spacing:.07em; color:#0B0D12;
+  background:var(--tx2); border-radius:4px; padding:2px 6px; font-weight:700; font-family:JetBrains Mono,monospace}
+.item.t-text .kind{background:#3B82F6; color:#fff}
+.item.t-image .kind{background:#A855F7; color:#fff}
+.item.t-qr .kind{background:#10B981; color:#000}
+.item.t-barcode .kind{background:#F59E0B; color:#000}
+.item.t-rule .kind,.item.t-space .kind{background:#64748B; color:#fff}
+.item.t-card .kind{background:#EC4899; color:#fff}
+.item .ttl{flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:var(--tx); font-size:11.5px; font-weight:500}
+.item .body{padding:10px; border-top:1px solid var(--line); background:rgba(11,13,18,0.4)}
 .item.collapsed .body{display:none}
 
-#stage{flex:1; overflow:auto; display:flex; justify-content:center; padding:26px 20px 60px}
+#stage{flex:1; overflow:auto; display:flex; justify-content:center; padding:30px 20px 60px}
 #paper{
-  background:#fff; box-shadow:0 10px 40px rgba(0,0,0,.55); border-radius:3px;
-  align-self:flex-start; position:relative; image-rendering:pixelated;
+  background:#fff; box-shadow:0 25px 60px -15px rgba(0,0,0,.9), 0 0 0 1px rgba(255,255,255,0.08); border-radius:2px;
+  align-self:flex-start; position:relative;
 }
-#paper canvas{display:block; image-rendering:pixelated}
-.tearline{height:14px; background:repeating-linear-gradient(90deg,#fff 0 6px,transparent 6px 12px)}
+#paper canvas{display:block}
+.tearline{height:12px; background:radial-gradient(circle at 4px top, transparent 3px, #ffffff 4px); background-size:8px 6px; background-repeat:repeat-x}
 #stagebar{
-  flex:0 0 auto; display:flex; align-items:center; gap:10px; padding:9px 14px;
-  border-bottom:1px solid var(--line); background:var(--panel);
+  flex:0 0 auto; display:flex; align-items:center; gap:10px; padding:8px 16px;
+  border-bottom:1px solid var(--line); background:rgba(11,13,18,0.85); backdrop-filter:blur(8px);
 }
-.pill{background:var(--panel2); border:1px solid var(--line); border-radius:20px; padding:3px 10px; font-size:11.5px; color:var(--tx2)}
+.pill{background:var(--card); border:1px solid var(--line); border-radius:6px; padding:3px 8px; font-size:11px; color:var(--tx2); font-family:JetBrains Mono,monospace}
 
 #log{
-  font-family:ui-monospace,Menlo,Consolas,monospace; font-size:11px; line-height:1.5;
-  background:#0b0d12; border:1px solid var(--line); border-radius:8px; padding:8px;
-  height:150px; overflow:auto; white-space:pre-wrap; word-break:break-all; color:#9fb0c9;
+  font-family:JetBrains Mono,ui-monospace,Menlo,Consolas,monospace; font-size:10.5px; line-height:1.5;
+  background:#0B0D12; border:1px solid var(--line); border-radius:6px; padding:8px;
+  height:120px; overflow:auto; white-space:pre-wrap; word-break:break-all; color:#94A3B8;
 }
-#log .e{color:var(--err)} #log .o{color:var(--ok)} #log .w{color:var(--warn)} #log .d{color:#5f6b7f}
-#prog{height:5px; background:var(--panel2); border-radius:3px; overflow:hidden; margin-top:8px}
-#progbar{height:100%; width:0; background:linear-gradient(90deg,var(--acc),var(--acc2)); transition:width .12s}
-.empty{color:var(--tx2); text-align:center; padding:26px 12px; font-size:12px}
-.warnbox{background:rgba(255,176,32,.09); border:1px solid rgba(255,176,32,.35); color:#ffd98a;
-  border-radius:8px; padding:8px 10px; font-size:11.5px; line-height:1.45}
+#log .e{color:var(--err)} #log .o{color:var(--ok)} #log .w{color:var(--warn)} #log .d{color:#64748B}
+#prog{height:4px; background:var(--panel2); border-radius:2px; overflow:hidden; margin-top:8px}
+#progbar{height:100%; width:0; background:linear-gradient(90deg,var(--acc),#06B6D4); transition:width .12s}
+.empty{color:var(--tx2); text-align:center; padding:30px 12px; font-size:12px}
+.warnbox{background:rgba(245,158,11,.08); border:1px solid rgba(245,158,11,.3); color:#FCD34D;
+  border-radius:6px; padding:8px 10px; font-size:11px; line-height:1.45}
 .swatch{display:flex; gap:5px}
-.swatch button{flex:1; padding:5px 0; font-size:11.5px}
+.swatch button{flex:1; padding:5px 0; font-size:11px; background:var(--bg)}
 .swatch button.on{background:var(--acc); border-color:var(--acc); color:#fff; font-weight:600}
-#emojiModal{position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:50;
-  display:flex; align-items:center; justify-content:center; backdrop-filter:blur(2px)}
+#emojiModal{position:fixed; inset:0; background:rgba(0,0,0,.65); z-index:50;
+  display:flex; align-items:center; justify-content:center; backdrop-filter:blur(4px)}
 #emojiModal[hidden]{display:none}
-.epanel{width:430px; max-width:92vw; max-height:74vh; background:var(--panel);
-  border:1px solid var(--line); border-radius:14px; display:flex; flex-direction:column;
-  box-shadow:0 24px 70px rgba(0,0,0,.6); overflow:hidden}
-.epanel .ehead{padding:11px 13px; border-bottom:1px solid var(--line); display:flex; gap:8px; align-items:center}
-.ecats{display:flex; gap:4px; padding:8px 11px 0; flex-wrap:wrap}
-.ecats button{padding:3px 9px; font-size:11.5px; border-radius:14px}
+.epanel{width:430px; max-width:92vw; max-height:74vh; background:var(--surface);
+  border:1px solid var(--line); border-radius:10px; display:flex; flex-direction:column;
+  box-shadow:0 24px 70px rgba(0,0,0,.7); overflow:hidden}
+.epanel .ehead{padding:12px 14px; border-bottom:1px solid var(--line); display:flex; gap:8px; align-items:center; background:var(--card)}
+.ecats{display:flex; gap:4px; padding:8px 12px 0; flex-wrap:wrap}
+.ecats button{padding:3px 8px; font-size:11px; border-radius:12px; background:var(--card)}
 .ecats button.on{background:var(--acc); border-color:var(--acc); color:#fff; font-weight:600}
-.egrid{padding:10px 11px 14px; overflow:auto; display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(40px,1fr)); gap:3px}
-.egrid button{font-family:'Noto Emoji','Noto Color Emoji',sans-serif; font-size:21px; line-height:1;
-  padding:7px 0; background:transparent; border:1px solid transparent; border-radius:8px}
+.egrid{padding:10px 12px 14px; overflow:auto; display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(40px,1fr)); gap:4px}
+.egrid button{font-family:'Noto Emoji','Noto Color Emoji',sans-serif; font-size:20px; line-height:1;
+  padding:6px 0; background:transparent; border:1px solid transparent; border-radius:6px}
 .egrid button:hover{background:var(--panel2); border-color:var(--acc)}
 .enone{grid-column:1/-1; color:var(--tx2); text-align:center; padding:20px; font-size:12px}
-.tbar{display:flex; gap:6px; margin-bottom:4px}
-.tbar button{padding:3px 8px; font-size:11.5px}
-::-webkit-scrollbar{width:10px;height:10px}
-::-webkit-scrollbar-thumb{background:#2c323d; border-radius:6px; border:2px solid var(--panel)}
+.tbar{display:flex; gap:6px; margin-bottom:6px}
+.tbar button{padding:3px 8px; font-size:11px; background:var(--bg)}
+.preset-hdr{display:flex;align-items:center;gap:6px;cursor:pointer;user-select:none;-webkit-user-select:none;padding:6px 0 6px}
+.preset-hdr h2{margin:0;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--tx2);font-weight:600}
+.preset-hdr .chev{color:var(--tx2);font-size:9px;transition:transform .15s}
+.preset-hdr.open .chev{transform:rotate(90deg)}
+.preset-add-btn{width:20px;height:20px;min-width:20px;padding:0;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:13px;line-height:1;background:var(--panel2);border:1px solid var(--line);color:var(--tx2);cursor:pointer;transition:all .15s}
+.preset-add-btn:hover{border-color:#3B82F6;color:var(--tx);background:#222838}
+.preset-save-form{display:grid;grid-template-columns:1fr 1fr auto;gap:6px;margin-bottom:8px}
+.preset-save-form input{font-size:11px;padding:5px 8px}
+.preset-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.preset-grid button{display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:8px 10px;text-align:left;line-height:1.3;background:var(--card);border:1px solid var(--line);position:relative}
+.preset-grid button:hover{border-color:#3B82F6}
+.preset-grid button .pname{font-size:11.5px;font-weight:600;color:var(--tx);padding-right:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%}
+.preset-grid button .pdesc{font-size:10px;color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%}
+.preset-grid button .pdel{position:absolute;top:4px;right:4px;width:18px;height:18px;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--tx2);cursor:pointer;border-radius:4px;transition:all .15s}
+.preset-grid button .pdel:hover{color:var(--err);background:rgba(239,68,68,0.15)}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-thumb{background:var(--line); border-radius:9999px}
+::-webkit-scrollbar-thumb:hover{background:var(--acc)}
 ::-webkit-scrollbar-track{background:transparent}
+
+.dot-pattern {
+  background-size: 16px 16px;
+  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+}
 </style>
 </head>
 <body>
@@ -146,44 +168,98 @@ label{color:var(--tx2); font-size:11.5px; display:block; margin-bottom:3px; lett
 
   <!-- ================= LEFT : content ================= -->
   <div class="col left">
-    <div class="hdr"><h1>Content</h1><span class="spacer"></span>
+    <div class="hdr">
+      <div style="display:flex; align-items:center; gap:8px;">
+        <div style="width:26px; height:26px; border-radius:6px; background:rgba(59,130,246,0.15); border:1px solid rgba(59,130,246,0.3); display:flex; align-items:center; justify-content:center; color:#3B82F6;">
+          <svg style="width:14px;height:14px;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4H7v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <h1>PeriPage Studio</h1>
+      </div>
+      <span class="spacer"></span>
       <button class="mini ghost" id="btnCollapse" title="Collapse all">⇕</button>
       <button class="mini ghost danger" id="btnClear" title="Remove everything">Clear</button>
     </div>
+
     <div class="sec">
-      <div class="addbar">
-        <button data-add="text">＋ Text</button>
-        <button data-add="image">＋ Image</button>
-        <button data-add="qr">＋ QR code</button>
-        <button data-add="barcode">＋ Barcode</button>
-        <button data-add="rule">＋ Divider</button>
-        <button data-add="space">＋ Spacer</button>
-        <button data-add="card" style="grid-column:1/-1">🎁 ＋ Gift tag</button>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+        <span style="font-size:10.5px; font-weight:600; text-transform:uppercase; letter-spacing:.08em; color:var(--tx2)">Add Content Block</span>
+        <span style="font-size:9.5px; font-family:JetBrains Mono,monospace; color:var(--tx2)"></span>
       </div>
+      <div class="addbar">
+        <button data-add="text">
+          <svg style="width:14px;height:14px;color:#3B82F6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16m-7 6h7"/></svg>
+          Text
+        </button>
+        <button data-add="image">
+          <svg style="width:14px;height:14px;color:#A855F7" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+          Image
+        </button>
+        <button data-add="qr">
+          <svg style="width:14px;height:14px;color:#10B981" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/></svg>
+          QR code
+        </button>
+        <button data-add="barcode">
+          <svg style="width:14px;height:14px;color:#F59E0B" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h2v12H4zm4 0h1v12H8zm3 0h2v12h-2zm4 0h1v12h-1zm3 0h2v12h-2z"/></svg>
+          Barcode
+        </button>
+        <button data-add="rule">
+          <svg style="width:14px;height:14px;color:var(--tx2)" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 12h16"/></svg>
+          Divider
+        </button>
+        <button data-add="space">
+          <svg style="width:14px;height:14px;color:#38BDF8" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M8 9l4-4 4 4m0 6l-4 4-4-4"/></svg>
+          Spacer
+        </button>
+      </div>
+    </div>
+
+    <div class="sec" id="secPresets">
+      <div class="preset-hdr" id="presetHdr">
+        <span class="chev">▶</span>
+        <h2>Presets</h2>
+        <button type="button" class="preset-add-btn" id="btnPresetToggle" title="Nuovo preset">+</button>
+      </div>
+      <div id="presetBody" style="display:none">
+        <form id="presetSaveForm" class="preset-save-form" style="display:none" onsubmit="event.preventDefault(); saveCurrentAsPreset();">
+          <input type="text" id="presetNameInput" placeholder="Nome preset" maxlength="30" required>
+          <input type="text" id="presetDescInput" placeholder="Descrizione breve" maxlength="60">
+          <button type="submit" id="btnPresetSave" class="btn" style="padding:4px 10px; font-size:11px;">Salva</button>
+        </form>
+        <div class="preset-grid" id="presetGrid"></div>
+        <div class="preset-actions" style="margin-top:8px; display:flex; gap:6px;">
+          <button type="button" class="mini" id="btnExportPresets" style="flex:1">↓ Esporta preset</button>
+          <button type="button" class="mini" id="btnImportPresets" style="flex:1">↑ Importa preset</button>
+          <input type="file" id="presetImportInput" accept=".json" style="display:none">
+        </div>
+      </div>
+    </div>
+    
+    <div style="padding:6px 12px 0; display:flex; align-items:center; justify-content:between;">
+      <span style="font-size:10.5px; font-weight:600; text-transform:uppercase; letter-spacing:.08em; color:var(--tx2)">Block Stack</span>
     </div>
     <div id="list"></div>
     <div class="spacer"></div>
-    <div class="sec">
+    <div class="sec" style="background:rgba(22,26,36,0.6)">
       <div class="grid3">
         <button class="mini" id="btnSave">Save</button>
         <button class="mini" id="btnLoad">Load</button>
-        <button class="mini" id="btnPng">PNG</button>
+        <button class="mini" id="btnPng">Export PNG</button>
       </div>
     </div>
   </div>
 
   <!-- ================= CENTER : preview ================= -->
-  <div class="col center">
+  <div class="col center dot-pattern">
     <div id="stagebar">
-      <strong style="font-size:13px">Preview</strong>
+      <strong style="font-size:12.5px; font-weight:600">Preview</strong>
       <span class="pill" id="pillDims">–</span>
       <span class="pill" id="pillBytes">–</span>
       <span class="spacer"></span>
-      <label style="margin:0">Zoom</label>
-      <select id="zoom" style="width:78px">
+      <label style="margin:0; font-size:11px">Zoom</label>
+      <select id="zoom" style="width:78px; font-size:11px; padding:4px">
         <option value="1">1×</option>
-        <option value="1.5">1.5×</option>
-        <option value="2" selected>2×</option>
+        <option value="1.5" selected>1.5×</option>
+        <option value="2">2×</option>
         <option value="3">3×</option>
       </select>
       <button class="mini" id="btnGrid" title="Toggle 1:1 dot grid">Dots</button>
@@ -191,38 +267,61 @@ label{color:var(--tx2); font-size:11.5px; display:block; margin-bottom:3px; lett
     <div id="stage">
       <div id="paper"><canvas id="cv" width="384" height="10"></canvas><div class="tearline"></div></div>
     </div>
+    <div style="position:absolute; bottom:10px; left:14px; font-family:JetBrains Mono,monospace; font-size:10px; color:var(--tx2); background:rgba(17,20,28,0.9); border:1px solid var(--line); padding:4px 8px; border-radius:5px; pointer-events:none">
+      ESC/POS 1-bit Pixel Grid · 203 DPI
+    </div>
   </div>
 
   <!-- ================= RIGHT : printer ================= -->
   <div class="col right">
-    <div class="hdr"><span class="dot" id="dot"></span><h1 id="devName">Not connected</h1></div>
+    <div class="hdr">
+      <span class="dot" id="dot"></span>
+      <h1 id="devName" style="font-size:12.5px; font-family:JetBrains Mono,monospace">Not connected</h1>
+    </div>
 
     <div class="sec">
       <h2>Connection</h2>
       <div class="f grid2">
-        <button class="primary" id="btnConnect">Connect</button>
-        <button id="btnDisconnect" disabled>Disconnect</button>
+        <button class="primary" id="btnConnect" style="font-size:11.5px">Connect</button>
+        <button id="btnDisconnect" disabled style="font-size:11.5px">Disconnect</button>
       </div>
       <div class="f">
         <label>Device filter</label>
-        <select id="filterMode">
+        <select id="filterMode" style="font-size:11.5px">
           <option value="name">PeriPage / PPG name prefix</option>
           <option value="all">All Bluetooth devices</option>
         </select>
       </div>
       <div class="f">
         <label>Write characteristic</label>
-        <select id="charSel"><option value="">— connect to discover —</option></select>
+        <select id="charSel" style="font-size:11.5px; font-family:JetBrains Mono,monospace"><option value="">— connect to discover —</option></select>
         <div class="hint" style="margin-top:4px">Auto-picked. Change it if printing does nothing.</div>
       </div>
     </div>
 
+    <div class="sec" style="background:linear-gradient(180deg, rgba(59,130,246,0.06), rgba(22,26,36,0.4)); border-color:rgba(59,130,246,0.25)">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:9px;">
+        <h2 style="margin:0; color:#60A5FA">Print</h2>
+        <span style="font-size:9.5px; font-family:JetBrains Mono,monospace; color:#3B82F6">Thermal ready</span>
+      </div>
+      <div class="f grid2">
+        <button class="primary" id="btnPrint" disabled style="font-size:12px; padding:8px">Print <span style="font-size:9.5px; opacity:0.8; font-family:JetBrains Mono">⌘P</span></button>
+        <button id="btnTest" disabled style="font-size:11.5px">Test strip</button>
+      </div>
+      <div class="grid2" style="margin-bottom:6px">
+        <button class="mini" id="btnFeed" disabled>Feed paper</button>
+        <button class="mini" id="btnReset" disabled>Reset printer</button>
+      </div>
+      <button class="mini" id="btnProbe" disabled style="width:100%; margin-top:4px; font-family:JetBrains Mono,monospace">Probe every characteristic</button>
+      <div id="prog"><div id="progbar"></div></div>
+    </div>
+
     <div class="sec">
-      <h2>Printer</h2>
+      <h2>Printer Settings</h2>
       <div class="f">
         <label>Paper width</label>
-        <select id="paperW">
-          <option value="384" selected>A6 · 58 mm · 384 dots</option>
+        <select id="paperW" style="font-size:11.5px">
+          <option value="384" selected>A6/mini · 58 mm · 384 dots</option>
           <option value="576">A6+ / A40 · 576 dots</option>
           <option value="832">80 mm · 832 dots</option>
         </select>
@@ -234,19 +333,19 @@ label{color:var(--tx2); font-size:11.5px; display:block; margin-bottom:3px; lett
         </div>
       </div>
       <div class="f grid2">
-        <div><label>Feed after (px)</label><input type="number" id="feed" value="80" min="0" max="255"></div>
-        <div><label>Rows / packet</label><input type="number" id="chunkRows" value="48" min="8" max="255"></div>
+        <div><label>Feed after (px)</label><input type="number" id="feed" value="80" min="0" max="255" style="font-family:JetBrains Mono"></div>
+        <div><label>Rows / packet</label><input type="number" id="chunkRows" value="48" min="8" max="255" style="font-family:JetBrains Mono"></div>
       </div>
       <div class="f">
         <label>Transfer mode</label>
-        <select id="txMode">
+        <select id="txMode" style="font-size:11.5px">
           <option value="rows" selected>Row by row (matches reference)</option>
           <option value="bulk">Bulk packets (faster)</option>
         </select>
       </div>
       <div class="f grid2">
         <div><label>BLE packet (bytes)</label>
-          <select id="mtu">
+          <select id="mtu" style="font-family:JetBrains Mono; font-size:11.5px">
             <option value="20">20 (safest)</option>
             <option value="100">100</option>
             <option value="180" selected>180</option>
@@ -254,32 +353,22 @@ label{color:var(--tx2); font-size:11.5px; display:block; margin-bottom:3px; lett
             <option value="500">500</option>
           </select>
         </div>
-        <div><label>Delay (ms)</label><input type="number" id="delay" value="18" min="0" max="500"></div>
+        <div><label>Delay (ms)</label><input type="number" id="delay" value="18" min="0" max="500" style="font-family:JetBrains Mono"></div>
       </div>
     </div>
 
     <div class="sec">
-      <h2>Print</h2>
-      <div class="f grid2">
-        <button class="primary" id="btnPrint" disabled>Print</button>
-        <button id="btnTest" disabled>Test strip</button>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:9px;">
+        <h2 style="margin:0">Log</h2>
+        <button class="mini ghost" onclick="$('#log').textContent=''" style="font-size:10px">Clear</button>
       </div>
-      <div class="grid2">
-        <button class="mini" id="btnFeed" disabled>Feed paper</button>
-        <button class="mini" id="btnReset" disabled>Reset printer</button>
-      </div>
-      <button class="mini" id="btnProbe" disabled style="width:100%;margin-top:7px">Probe every characteristic</button>
-      <div id="prog"><div id="progbar"></div></div>
-    </div>
-
-    <div class="sec">
-      <h2>Log</h2>
       <div id="log"></div>
     </div>
 
     <div class="sec" id="secWarn"></div>
   </div>
 </div>
+
 <div id="emojiModal" hidden>
   <div class="epanel">
     <div class="ehead">
@@ -306,14 +395,12 @@ const S = {
   els: [],
   width: 384,
   density: 1,
-  zoom: 2,
+  zoom: 1.5,
   grid: false,
   sel: null,
 };
 
 /* ------------------------------------------------------------ font catalogue */
-// Values carry no generic fallback; fontStack() appends the emoji face and a
-// fallback in the right order, so emoji always resolve to the monochrome family.
 const FONTS = [
   ['Basic', [
     ['sans-serif','System sans'], ['serif','System serif'], ['ui-monospace, monospace','System mono'],
@@ -321,6 +408,7 @@ const FONTS = [
   ['Heavy display', [
     ["'Anton'",'Anton'], ["'Archivo Black'",'Archivo Black'], ["'Alfa Slab One'",'Alfa Slab One'],
     ["'Titan One'",'Titan One'], ["'Rubik Mono One'",'Rubik Mono One'], ["'Bebas Neue'",'Bebas Neue'],
+    ["'Black Ops One'",'Black Ops One'],
   ]],
   ['Funky', [
     ["'Bungee'",'Bungee'], ["'Bungee Shade'",'Bungee Shade'], ["'Monoton'",'Monoton'],
@@ -344,8 +432,6 @@ const FONTS = [
 const EMOJI_FACE = "'Noto Emoji'";
 const fontStack = fam => `${fam}, ${EMOJI_FACE}, sans-serif`;
 
-// A webfont that has not downloaded yet silently renders as a fallback, which would
-// bake the wrong glyphs into the raster. Load faces first, then repaint.
 async function ensureFonts(){
   if (!document.fonts) return;
   const fams = new Set([EMOJI_FACE]);
@@ -383,7 +469,6 @@ function makeEl(type){
 }
 
 /* ------------------------------------------------------------ image helpers */
-// luminance buffer -> 1-bit, 1 = black dot
 function toMono(lum, w, h, mode, thr){
   const out = new Uint8Array(w*h);
   if (mode === 'threshold' || mode === 'none'){
@@ -401,7 +486,6 @@ function toMono(lum, w, h, mode, thr){
     }
     return out;
   }
-  // error diffusion
   const buf = Float32Array.from(lum);
   const push = (x,y,e) => { if (x>=0 && x<w && y<h) buf[y*w+x] += e; };
   const atk = mode === 'atkinson';
@@ -415,7 +499,7 @@ function toMono(lum, w, h, mode, thr){
         push(x+1,y,e); push(x+2,y,e);
         push(x-1,y+1,e); push(x,y+1,e); push(x+1,y+1,e);
         push(x,y+2,e);
-      } else {                                   // Floyd–Steinberg
+      } else {
         push(x+1,y,   err*7/16);
         push(x-1,y+1, err*3/16);
         push(x,  y+1, err*5/16);
@@ -426,16 +510,15 @@ function toMono(lum, w, h, mode, thr){
   return out;
 }
 
-// canvas -> luminance with brightness / contrast / invert applied
 function lumFrom(ctx, w, h, {brightness=0, contrast=0, invert=false} = {}){
   const d = ctx.getImageData(0,0,w,h).data;
   const lum = new Float32Array(w*h);
   const c = clamp(contrast,-100,100);
-  const k = (259*(c+255)) / (255*(259-c));       // standard contrast factor
+  const k = (259*(c+255)) / (255*(259-c));
   for (let i=0, p=0; i<lum.length; i++, p+=4){
     const a = d[p+3]/255;
     let v = 0.299*d[p] + 0.587*d[p+1] + 0.114*d[p+2];
-    v = v*a + 255*(1-a);                          // composite onto white paper
+    v = v*a + 255*(1-a);
     v = k*(v-128) + 128 + brightness;
     if (invert) v = 255 - v;
     lum[i] = clamp(v, 0, 255);
@@ -477,7 +560,6 @@ function wrap(ctx, text, maxW){
   return lines;
 }
 
-/* bounding box of non-white content, used to snap QR codes to whole dots */
 function darkBBox(ctx, w, h, thr){
   thr = thr || 160;
   const d = ctx.getImageData(0,0,w,h).data;
@@ -491,7 +573,6 @@ function darkBBox(ctx, w, h, thr){
 }
 
 /* --------------------------------------------------- per-element rasterising */
-// returns { mono:Uint8Array(W*h), h }
 function renderEl(el, W){
   const pad = el.before|0, padAfter = el.after|0;
   const wrapPad = (mono, h) => {
@@ -563,7 +644,7 @@ function renderEl(el, W){
         const p = ((y|0)*bb.w + (x|0))*4;
         return (0.299*d[p] + 0.587*d[p+1] + 0.114*d[p+2]) < 128;
       };
-      let run = 0;                                   // finder top edge is exactly 7 modules
+      let run = 0;
       while (run < bb.w && dark(run, 0)) run++;
       const ms = run/7;
       const n  = ms > 0 ? Math.round(bb.w/ms) : 0;
@@ -585,7 +666,7 @@ function renderEl(el, W){
         return wrapPad(m, side);
       }
     }
-    const size = target;                             // fallback: plain nearest-neighbour scale
+    const size = target;
     const ctx = blankCtx(W, size);
     ctx.imageSmoothingEnabled = false;
     ctx.drawImage(tmp, alignX(el.align, size, W), 0, size, size);
@@ -624,8 +705,7 @@ function renderEl(el, W){
 }
 
 /* ==========================================================================
-   Gift tag — a framed card. Borders are painted as geometry on the dot grid,
-   so they stay crisp at 203 dpi instead of relying on font glyphs.
+   Gift tag
    ========================================================================== */
 const frameRect = (c,x,y,w,h,t) => {
   c.fillRect(x, y, w, t); c.fillRect(x, y+h-t, w, t);
@@ -681,7 +761,7 @@ const BORDERS = {
                zone:t => t,
                draw(c,W,H,t,i){
                  dashFrame(c,i,i,W-2*i,H-2*i,t,t*3,t*2);
-                 const r=Math.max(6,t*3);            // white notches punched into the sides
+                 const r=Math.max(6,t*3);
                  c.save(); c.fillStyle='#fff';
                  c.beginPath(); c.arc(i, H/2, r, 0, Math.PI*2); c.fill();
                  c.beginPath(); c.arc(W-i, H/2, r, 0, Math.PI*2); c.fill();
@@ -737,7 +817,6 @@ const BORDERS = {
                } },
 };
 
-// lay the card's lines out, measuring before anything is drawn
 function cardLines(el, innerW){
   const probe = blankCtx(4,4);
   const base = Math.max(10, el.size|0);
@@ -749,7 +828,6 @@ function cardLines(el, innerW){
     out.push({ text, size, font:`${weight} ${size}px ${fam}`, tracking:tracking||0,
                h:Math.round(size*(lh||1.25)) });
 
-  // emoji ornaments lose their detail below roughly 40 dots on a 203 dpi head
   if (el.ornament) push(el.ornament, Math.max(38, Math.round(base*1.35)), '400', 0, 1.25);
   if (el.to){
     if (el.labels) push('TO', labelSize, '400', Math.max(1,Math.round(labelSize*0.22)), 1.6);
@@ -817,23 +895,30 @@ function compose(){
 function paint(){
   const {mono, w, h} = compose();
   const cv = $('#cv');
-  cv.width = w; cv.height = h;
-  const ctx = cv.getContext('2d');
-  const img = ctx.createImageData(w, h);
+  const z = S.zoom;
+  cv.width = Math.round(w * z); cv.height = Math.round(h * z);
+  const ctx = cv.getContext('2d', {willReadFrequently: false});
+  /* draw native-resolution mono buffer scaled up smoothly */
+  const tmp = document.createElement('canvas');
+  tmp.width = w; tmp.height = h;
+  const tctx = tmp.getContext('2d', {willReadFrequently: false});
+  const img = tctx.createImageData(w, h);
   for (let i=0, p=0; i<mono.length; i++, p+=4){
     const v = mono[i] ? 0 : 255;
     img.data[p] = img.data[p+1] = img.data[p+2] = v;
     img.data[p+3] = 255;
   }
-  ctx.putImageData(img, 0, 0);
-  cv.style.width  = Math.round(w * S.zoom) + 'px';
-  cv.style.height = Math.round(h * S.zoom) + 'px';
-  $('#paper').style.width = Math.round(w * S.zoom) + 'px';
+  tctx.putImageData(img, 0, 0);
+  ctx.imageSmoothingEnabled = z > 1;
+  ctx.imageSmoothingQuality = 'high';
+  ctx.drawImage(tmp, 0, 0, Math.round(w * z), Math.round(h * z));
+  cv.style.width  = '';
+  cv.style.height = '';
+  $('#paper').style.width = Math.round(w * z) + 'px';
   $('#pillDims').textContent = `${w} × ${h} dots`;
   $('#pillBytes').textContent = `${(Math.ceil(w/8)*h/1024).toFixed(1)} KiB raster`;
 }
 
-/* --------------------------------------------- 1-bit rows -> ESC/POS raster */
 function packRows(mono, w, h){
   const bpr = Math.ceil(w/8);
   const out = new Uint8Array(bpr*h);
@@ -850,8 +935,6 @@ function packRows(mono, w, h){
 const U16 = x => `0000${x}-0000-1000-8000-00805f9b34fb`;
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 
-// Chrome rejects the entire requestDevice() call if any single UUID is malformed,
-// so everything is validated here rather than trusted.
 function validUuids(list, label){
   const ok = [], bad = [];
   for (const u of list) (UUID_RE.test(u) ? ok : bad).push(u);
@@ -867,7 +950,6 @@ const KNOWN_SERVICES = validUuids([
   '6e400001-b5a3-f393-e0a9-e50e24dcca9e',
 ], 'service');
 
-// preferred write characteristics, best first
 const PREFERRED_WRITE = validUuids([
   U16('ff02'), U16('2af1'), U16('ae01'), U16('fff2'), U16('fff1'), U16('ffe1'),
   'bef8d6c9-9c21-4c9e-b632-bd58c1009f9f',
@@ -883,12 +965,11 @@ const PREFERRED_NOTIFY = validUuids([
 
 const BT = { device:null, server:null, chars:[], write:null, notify:null };
 
-// 0000ff02-0000-1000-8000-00805f9b34fb -> "ff02";  custom UUIDs -> first block
 const shortUuid = u => {
+  if (!u) return '';
   const m = /^0000([0-9a-f]{4})-0000-1000-8000-00805f9b34fb$/.exec(u);
-  return m ? m[1] : u.slice(0,8);
+  return m ? m[1] : String(u).slice(0,8);
 };
-// services that actually carry print data, vs. housekeeping services that never do
 const PRINTER_SERVICES = new Set([
   U16('ff00'), U16('18f0'), U16('ae30'), U16('fff0'), U16('ffe0'), U16('fee7'),
   'e7810a71-73ae-499d-8c15-faa9aef0c3f2',
@@ -901,7 +982,7 @@ function scoreWritable(x){
   const i = PREFERRED_WRITE.indexOf(x.c.uuid);
   let n = i >= 0 ? 100 - i : 0;
   if (PRINTER_SERVICES.has(x.svc)) n += 50;
-  if (GENERIC_SERVICES.has(x.svc)) n -= 200;      // never auto-pick battery/device-info
+  if (GENERIC_SERVICES.has(x.svc)) n -= 200;
   if (x.c.properties.writeWithoutResponse) n += 5;
   return n;
 }
@@ -950,14 +1031,14 @@ async function connect(){
         const p = c.properties;
         BT.chars.push({ c, svc:s.uuid,
           w: p.write || p.writeWithoutResponse, n: p.notify || p.indicate });
-        log(`  ${shortUuid(s.uuid)} / ${shortUuid(c.uuid)}  ` +
+        log(`  ${shortUuid(s.svc)} / ${shortUuid(c.uuid)}  ` +
             [p.read&&'r', p.write&&'w', p.writeWithoutResponse&&'W', p.notify&&'n']
               .filter(Boolean).join('') , 'd');
       }
     }
     const writable = BT.chars.filter(x => x.w);
     if (!writable.length){
-      log('No writable characteristic found. This printer is probably Bluetooth Classic (SPP) only — see note below.', 'e');
+      log('No writable characteristic found. This printer is probably Bluetooth Classic (SPP) only.', 'e');
       $('#devName').textContent = dev.name || 'Connected';
       setConnected(true); $('#btnPrint').disabled = true; $('#btnTest').disabled = true;
       return;
@@ -972,8 +1053,8 @@ async function connect(){
     BT._writable = writable;
     log(`Write characteristic #${pick}: ${shortUuid(writable[pick].svc)}/${shortUuid(BT.write.uuid)}`, 'o');
     if (best <= 0)
-      log('None of these look like a known printer endpoint. Use "Probe every characteristic" to find the right one.', 'w');
-    await sleep(250);                       // let the link settle before the first write
+      log('None of these look like a known printer endpoint. Use "Probe every characteristic".', 'w');
+    await sleep(250);
 
     const nt = BT.chars.find(x => x.n && PREFERRED_NOTIFY.includes(x.c.uuid))
             || BT.chars.find(x => x.n);
@@ -1042,13 +1123,11 @@ async function printMono(mono, w, h, opts){
 
   for (let y=0; y<h; y+=rowsPer){
     const rows = Math.min(rowsPer, h-y);
-    // the reference driver resets immediately before every raster block
     await writeBytes(CMD.reset());
     await sleep(20);
     await writeBytes(new Uint8Array(
       [0x1d,0x76,0x30,0x00, bpr & 0xff, (bpr>>8)&0xff, rows & 0xff, (rows>>8)&0xff]));
     if (byRow){
-      // one write per row, exactly as the reference does — never straddle a row boundary
       for (let r=0; r<rows; r++)
         await writeBytes(data.subarray((y+r)*bpr, (y+r+1)*bpr));
     } else {
@@ -1067,7 +1146,6 @@ async function printMono(mono, w, h, opts){
   }
 }
 
-// print one short line of text, used by the characteristic probe
 async function sendLabel(text){
   const W = S.width, H = 44;
   const ctx = blankCtx(W, H);
@@ -1079,8 +1157,6 @@ async function sendLabel(text){
                   {feed:false, progress:false});
 }
 
-// Writing to the wrong characteristic usually succeeds silently, so the only
-// reliable test is to print a numbered line through each one in turn.
 async function probeChars(){
   const list = BT._writable || [];
   if (!list.length){ log('No writable characteristics to probe.', 'w'); return; }
@@ -1090,13 +1166,13 @@ async function probeChars(){
   for (let i=0; i<list.length; i++){
     const tag = `#${i} ${shortUuid(list[i].svc)}/${shortUuid(list[i].c.uuid)}`;
     BT.write = list[i].c;
-    log('  \u2192 ' + tag);
+    log('  → ' + tag);
     try { await sendLabel(tag); await sleep(400); }
     catch(e){ log('    write rejected: ' + e.message, 'w'); }
   }
   BT.write = saved;
   try { await writeBytes(CMD.feed(70)); } catch(e){}
-  log('Probe done. Whichever line appeared on paper names the characteristic \u2014 select it above.', 'o');
+  log('Probe done.', 'o');
   $('#btnProbe').disabled = false;
 }
 
@@ -1121,13 +1197,13 @@ async function doTest(){
   ctx.fillText('TEST STRIP', 6, 12);
   ctx.font = '18px sans-serif';
   ctx.fillText(W + ' dots wide', 6, 50);
-  for (let x=0;x<W;x++){                      // horizontal ramp, dithered below
+  for (let x=0;x<W;x++){
     const v = Math.round(255 * x/(W-1));
     ctx.fillStyle = `rgb(${v},${v},${v})`;
     ctx.fillRect(x, 76, 1, 26);
   }
   ctx.fillStyle = '#000';
-  for (let x=0;x<W;x+=2) ctx.fillRect(x, 108, 1, 8);   // 1px vertical bars
+  for (let x=0;x<W;x+=2) ctx.fillRect(x, 108, 1, 8);
   ctx.fillRect(0, H-4, W, 4);
   const lum  = lumFrom(ctx, W, H);
   const mono = toMono(lum, W, H, 'floyd', 128);
@@ -1138,8 +1214,7 @@ async function doTest(){
 }
 
 /* ==========================================================================
-   Emoji picker — inserts into a text block. Rendered through Noto Emoji so the
-   glyphs are already black and white; colour emoji would threshold into blobs.
+   Emoji picker
    ========================================================================== */
 const EMOJI = {
   'Smileys': '😀 😃 😄 😁 😆 😅 🤣 😂 🙂 🙃 😉 😊 😇 🥰 😍 🤩 😘 😗 😋 😛 🤪 🤨 🧐 🤓 😎 🥳 😏 😒 😞 😔 😟 😕 🙁 😣 😖 😫 😩 🥺 😢 😭 😤 😠 😡 🤬 🤯 😳 🥵 🥶 😱 😨 😰 😥 😓 🤗 🤔 🤭 🤫 🤥 😶 😐 😑 😬 🙄 😯 😴 🤤 😪 😵 🤐 🥴 🤢 🤮 🤧 😷 🤒 🤕 🤑 🤠 😈 👿 👹 👺 🤡 💩 👻 💀 ☠️ 👽 👾 🤖 🎃',
@@ -1210,16 +1285,16 @@ function insertEmoji(ch){
 const esc = s => String(s??'').replace(/[<>&"]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));
 const F = (label, html) => `<div class="f"><label>${label}</label>${html}</div>`;
 const num = (el,k,label,min,max,step) =>
-  F(label, `<input type="number" data-id="${el.id}" data-k="${k}" data-t="n" value="${el[k]}" min="${min}" max="${max}" step="${step||1}">`);
+  F(label, `<input type="number" data-id="${el.id}" data-k="${k}" data-t="n" value="${el[k]}" min="${min}" max="${max}" step="${step||1}" style="font-family:JetBrains Mono">`);
 const rng = (el,k,label,min,max,step) =>
-  F(`${label} <b style="color:var(--tx)">${el[k]}</b>`,
+  F(`${label} <b style="color:var(--tx); font-family:JetBrains Mono">${el[k]}</b>`,
     `<input type="range" data-id="${el.id}" data-k="${k}" data-t="n" value="${el[k]}" min="${min}" max="${max}" step="${step||1}">`);
 const sel = (el,k,label,opts) =>
-  F(label, `<select data-id="${el.id}" data-k="${k}">` +
+  F(label, `<select data-id="${el.id}" data-k="${k}" style="font-size:11.5px">` +
     opts.map(([v,t]) => `<option value="${v}"${String(el[k])===String(v)?' selected':''}>${t}</option>`).join('') +
     `</select>`);
 const chk = (el,k,label) =>
-  `<label style="display:flex;gap:6px;align-items:center;color:var(--tx);margin:0 0 8px">
+  `<label style="display:flex;gap:6px;align-items:center;color:var(--tx);margin:0 0 8px;cursor:pointer">
      <input type="checkbox" data-id="${el.id}" data-k="${k}" data-t="b"${el[k]?' checked':''}> ${label}</label>`;
 const ALIGN = [['left','Left'],['center','Centre'],['right','Right']];
 
@@ -1231,7 +1306,7 @@ function borderSelect(el){
       `<option value="${v}"${el.border===v?' selected':''}>${t}</option>`).join('') +
     `</optgroup>`).join('');
   return `<div class="f"><label>Border</label>` +
-         `<select data-id="${el.id}" data-k="border">${html}</select></div>`;
+         `<select data-id="${el.id}" data-k="border" style="font-size:11.5px">${html}</select></div>`;
 }
 
 function fontSelect(el){
@@ -1243,7 +1318,7 @@ function fontSelect(el){
   const extra = known ? '' :
     `<option value="${esc(el.family)}" selected>${esc(el.family)} (saved)</option>`;
   return `<div class="f"><label>Font</label>` +
-         `<select data-id="${el.id}" data-k="family" data-font="1">${extra}${groups}</select></div>`;
+         `<select data-id="${el.id}" data-k="family" data-font="1" style="font-size:11.5px">${extra}${groups}</select></div>`;
 }
 
 function title(el){
@@ -1360,7 +1435,7 @@ const byId = id => S.els.find(e => e.id === +id);
 
 /* ------------------------------------------------------------- interactions */
 $('#list').addEventListener('click', ev => {
-  if (ev.target.closest('[data-handle]')) return;   // the handle drags, it does not toggle
+  if (ev.target.closest('[data-handle]')) return;
   const t = ev.target.closest('[data-move],[data-dup],[data-del],[data-toggle]');
   if (!t) return;
   if (t.dataset.move){
@@ -1421,7 +1496,6 @@ $('#list').addEventListener('input', ev => {
   if (item) item.querySelector('.ttl').textContent = title(el);
   const lab = i.closest('.f')?.querySelector('label b');
   if (lab) lab.textContent = i.value;
-  // structural fields that change which controls are shown
   if (i.dataset.k === 'dither'){ buildList(); return; }
   if (i.dataset.font){ repaintWhenFontsReady(); return; }
   if (i.dataset.k === 'border'){ paint(); return; }
@@ -1443,9 +1517,6 @@ $('#list').addEventListener('change', ev => {
   r.readAsDataURL(file);
 });
 
-/* ------------------------------------------------------- drag to reorder ----
-   Pointer events rather than HTML5 drag-and-drop: HTML5 dragging does not fire
-   on touch screens, and this page is meant to be usable from a phone. */
 let drag = null;
 
 function afterElement(list, y){
@@ -1519,7 +1590,6 @@ $$('#density button').forEach(b => b.onclick = () => {
   $$('#density button').forEach(x => x.classList.toggle('on', x === b));
 });
 
-/* dot grid overlay */
 const gridOv = document.createElement('div');
 Object.assign(gridOv.style, {position:'absolute', inset:'0', pointerEvents:'none', display:'none'});
 $('#paper').appendChild(gridOv);
@@ -1527,13 +1597,12 @@ function drawGrid(){
   const z = S.zoom;
   gridOv.style.display = S.grid && z >= 2 ? 'block' : 'none';
   gridOv.style.backgroundImage =
-    `linear-gradient(to right, rgba(91,156,255,.35) 1px, transparent 1px),
-     linear-gradient(to bottom, rgba(91,156,255,.35) 1px, transparent 1px)`;
+    `linear-gradient(to right, rgba(59,130,246,.35) 1px, transparent 1px),
+     linear-gradient(to bottom, rgba(59,130,246,.35) 1px, transparent 1px)`;
   gridOv.style.backgroundSize = `${z}px ${z}px`;
 }
 $('#btnGrid').onclick = () => { S.grid = !S.grid; $('#btnGrid').classList.toggle('on'); drawGrid(); };
 
-/* save / load / export */
 const KEY = 'peripage-editor-v1';
 $('#btnSave').onclick = () => {
   const data = { width:S.width, density:S.density,
@@ -1551,7 +1620,7 @@ $('#btnLoad').onclick = () => {
     uid = Math.max(1, ...S.els.map(e => e.id)) + 1;
     $('#paperW').value = String(S.width);
     $$('#density button').forEach(x => x.classList.toggle('on', +x.dataset.d === S.density));
-    S.els.forEach(e => e.collapsed = true);        // a loaded layout starts tidy
+    S.els.forEach(e => e.collapsed = true);
     S.els.filter(e => e.type === 'image' && e.src).forEach(e => {
       const img = new Image(); img.onload = () => { e._img = img; paint(); }; img.src = e.src;
     });
@@ -1568,7 +1637,6 @@ $('#btnPng').onclick = () => {
   });
 };
 
-/* emoji picker wiring */
 $('#emojiCats').addEventListener('click', ev => {
   const b = ev.target.closest('[data-cat]');
   if (!b) return;
@@ -1589,7 +1657,6 @@ document.addEventListener('keydown', ev => {
   if (ev.key === 'Escape' && !$('#emojiModal').hidden) closeEmoji();
 });
 
-/* printer buttons */
 $('#btnConnect').onclick = connect;
 $('#btnDisconnect').onclick = () => { try{ BT.device?.gatt?.disconnect(); }catch(e){} setConnected(false); };
 $('#charSel').onchange = e => {
@@ -1608,23 +1675,354 @@ $('#btnReset').onclick = async () => {
   catch(e){ log('Reset failed: ' + e.message, 'e'); }
 };
 
+/* ==========================================================================
+   Presets
+   ========================================================================== */
+const PRESETS = [
+  {
+    id: 'default',
+    name: 'Default',
+    desc: 'Welcome document',
+    make() {
+      return [
+        Object.assign(makeEl('text'),  {text:'PERIPAGE A6', size:44, bold:true, align:'center', after:2}),
+        Object.assign(makeEl('rule'),  {thickness:4}),
+        Object.assign(makeEl('text'),  {text:'Web Bluetooth editor.\nType here, add photos, QR codes and barcodes, then hit Print.', size:22, align:'center'}),
+        Object.assign(makeEl('qr'),    {value:'https://developer.mozilla.org/docs/Web/API/Web_Bluetooth_API', size:220}),
+        Object.assign(makeEl('space'), {height:20}),
+      ];
+    },
+  },
+  {
+    id: 'filament3d',
+    name: '3D Filament',
+    desc: 'Spool label',
+    make() {
+      return [
+        Object.assign(makeEl('text'), {
+          text: 'BAMBU LAB',
+          family: "'Archivo Black'",
+          size: 28, bold: true, align: 'center',
+          invert: true, before: 0, after: 0,
+        }),
+        Object.assign(makeEl('text'), {
+          text: 'PLA MATTE',
+          family: "'Archivo Black'",
+          size: 44, bold: true, align: 'center',
+          invert: true, before: 0, after: 10,
+        }),
+        Object.assign(makeEl('text'), {
+          text: 'COLORE',
+          family: "'Archivo Black'",
+          size: 18, bold: false, align: 'left',
+          invert: false, before: 8, after: 0,
+          tracking: 4,
+        }),
+        Object.assign(makeEl('text'), {
+          text: 'DARK GREEN',
+          family: "'Archivo Black'",
+          size: 42, bold: true, align: 'left',
+          invert: false, before: 0, after: 6,
+        }),
+        Object.assign(makeEl('space'), {height: 8}),
+      ];
+    },
+  },
+  {
+    id: 'freezer',
+    name: 'Congelatore',
+    desc: 'Etichetta cibi',
+    make() {
+      return [
+        Object.assign(makeEl('text'), {
+          text: 'CONGELATORE',
+          family: "'Archivo Black'",
+          size: 45, bold: true, align: 'center',
+          invert: true, before: 0, after: 0,
+        }),
+        Object.assign(makeEl('text'), {
+          text: 'CIBO / SOSTANZA CONTENUTA',
+          family: "'Archivo Black'",
+          size: 16, bold: false, align: 'left',
+          invert: false, before: 10, after: 0,
+          tracking: 2,
+        }),
+        Object.assign(makeEl('text'), {
+          text: 'Nome del cibo',
+          family: "'Archivo Black'",
+          size: 38, bold: true, align: 'left',
+          invert: false, before: 2, after: 6,
+        }),
+        Object.assign(makeEl('rule'), {style:'solid', thickness:3, inset:0, before:4, after:10}),
+        Object.assign(makeEl('text'), {
+          text: 'DATA IMBUSTAMENTO / SIGILLATURA',
+          family: "'Archivo Black'",
+          size: 16, bold: false, align: 'left',
+          invert: false, before: 0, after: 0,
+          tracking: 2,
+        }),
+        Object.assign(makeEl('text'), {
+          text: 'GG/MM/AAAA',
+          family: "'Archivo Black'",
+          size: 38, bold: true, align: 'left',
+          invert: false, before: 2, after: 10,
+        }),
+      ];
+    },
+  },
+];
+
+const PRESETS_KEY = 'peripage-presets-v1';
+
+function loadCustomPresets() {
+  try {
+    const raw = localStorage.getItem(PRESETS_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    if (parsed && Array.isArray(parsed.presets)) {
+      return parsed.presets;
+    }
+    return [];
+  } catch (err) {
+    log('Impossibile caricare i preset da localStorage: ' + err.message, 'w');
+    return [];
+  }
+}
+
+function saveCustomPresets(arr) {
+  try {
+    const payload = { version: 1, presets: arr };
+    localStorage.setItem(PRESETS_KEY, JSON.stringify(payload));
+    return true;
+  } catch (err) {
+    log('Errore salvataggio preset in localStorage: ' + err.message, 'e');
+    return false;
+  }
+}
+
+function getAllPresets() {
+  const customs = loadCustomPresets().map(c => ({
+    id: c.id,
+    name: c.name,
+    desc: c.desc || '',
+    isCustom: true,
+    els: c.els,
+    make() {
+      return JSON.parse(JSON.stringify(this.els));
+    }
+  }));
+  return [...PRESETS, ...customs];
+}
+
+function saveCurrentAsPreset() {
+  const nameInput = $('#presetNameInput');
+  const descInput = $('#presetDescInput');
+  const name = (nameInput.value || '').trim();
+  if (!name) {
+    log('Inserire un nome per il preset.', 'w');
+    nameInput.focus();
+    return;
+  }
+  const desc = (descInput.value || '').trim().slice(0, 60);
+  const cleanEls = S.els.map(e => {
+    const c = { ...e };
+    delete c._img;
+    return c;
+  });
+  const customs = loadCustomPresets();
+  const newPreset = {
+    id: 'custom-' + Date.now(),
+    name: name.slice(0, 30),
+    desc,
+    els: JSON.parse(JSON.stringify(cleanEls))
+  };
+  customs.push(newPreset);
+  if (saveCustomPresets(customs)) {
+    nameInput.value = '';
+    descInput.value = '';
+    $('#presetSaveForm').style.display = 'none';
+    buildPresets();
+    log(`Preset "${newPreset.name}" salvato.`, 'o');
+  }
+}
+
+function deleteCustomPreset(id) {
+  const customs = loadCustomPresets();
+  const target = customs.find(p => p.id === id);
+  const filtered = customs.filter(p => p.id !== id);
+  if (saveCustomPresets(filtered)) {
+    buildPresets();
+    const name = target ? target.name : id;
+    log(`Preset "${name}" eliminato.`, 'o');
+  }
+}
+
+function exportPresets() {
+  const customs = loadCustomPresets();
+  const payload = { version: 1, presets: customs };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'peripage-presets.json';
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+  log(`Esportati ${customs.length} preset personalizzati.`, 'o');
+}
+
+function importPresets(file) {
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const data = JSON.parse(reader.result);
+      if (!data || typeof data !== 'object' || !Array.isArray(data.presets)) {
+        throw new Error('Formato non valido (manca array "presets")');
+      }
+      const existing = loadCustomPresets();
+      const existingIds = new Set(existing.map(p => p.id));
+      PRESETS.forEach(p => existingIds.add(p.id));
+
+      let addedCount = 0;
+      let skippedCount = 0;
+
+      for (const p of data.presets) {
+        if (!p || !p.id || !p.name || !Array.isArray(p.els)) {
+          skippedCount++;
+          continue;
+        }
+        if (existingIds.has(p.id)) {
+          log(`Preset "${p.name}" (${p.id}) già presente, ignorato.`, 'w');
+          skippedCount++;
+          continue;
+        }
+        const cleanEls = p.els.map(e => {
+          const c = { ...e };
+          delete c._img;
+          return c;
+        });
+        existing.push({
+          id: String(p.id),
+          name: String(p.name).slice(0, 30),
+          desc: p.desc ? String(p.desc).slice(0, 60) : '',
+          els: cleanEls
+        });
+        existingIds.add(p.id);
+        addedCount++;
+      }
+
+      if (addedCount > 0) {
+        saveCustomPresets(existing);
+        buildPresets();
+        log(`Import completato: ${addedCount} preset aggiunti, ${skippedCount} saltati.`, 'o');
+      } else {
+        log(`Nessun nuovo preset importato (${skippedCount} saltati o già presenti).`, 'w');
+      }
+    } catch (err) {
+      log('Errore durante l\'import dei preset: ' + err.message, 'e');
+    }
+  };
+  reader.onerror = () => {
+    log('Errore lettura file preset.', 'e');
+  };
+  reader.readAsText(file);
+}
+
+function loadPreset(preset) {
+  if (S.els.length && !confirm(`Replace current document with preset "${preset.name}"?`)) return;
+  S.els = preset.make();
+  uid = Math.max(1, ...S.els.map(e => e.id)) + 1;
+  S.els.forEach(e => e.collapsed = true);
+  S.els.filter(e => e.type === 'image' && e.src).forEach(e => {
+    const img = new Image(); img.onload = () => { e._img = img; paint(); }; img.src = e.src;
+  });
+  buildList();
+  log(`Preset "${preset.name}" loaded.`, 'o');
+}
+
+function buildPresets() {
+  const all = getAllPresets();
+  $('#presetGrid').innerHTML = all.map(p =>
+    `<button type="button" data-preset="${esc(p.id)}">` +
+      `<span class="pname">${esc(p.name)}</span>` +
+      `<span class="pdesc">${esc(p.desc)}</span>` +
+      (p.isCustom ? `<span class="pdel" data-del="${esc(p.id)}" title="Elimina preset">🗑</span>` : '') +
+    `</button>`
+  ).join('');
+}
+
+$('#presetHdr').addEventListener('click', () => {
+  const open = $('#presetHdr').classList.toggle('open');
+  $('#presetBody').style.display = open ? '' : 'none';
+});
+
+$('#btnPresetToggle').addEventListener('click', ev => {
+  ev.stopPropagation();
+  const form = $('#presetSaveForm');
+  const body = $('#presetBody');
+  if (body.style.display === 'none') {
+    $('#presetHdr').classList.add('open');
+    body.style.display = '';
+    form.style.display = 'grid';
+    $('#presetNameInput').focus();
+  } else {
+    const isClosed = form.style.display === 'none' || !form.style.display;
+    form.style.display = isClosed ? 'grid' : 'none';
+    if (isClosed) $('#presetNameInput').focus();
+  }
+});
+
+$('#btnPresetSave').addEventListener('click', e => {
+  e.preventDefault();
+  saveCurrentAsPreset();
+});
+
+$('#presetGrid').addEventListener('click', ev => {
+  const delBtn = ev.target.closest('[data-del]');
+  if (delBtn) {
+    ev.stopPropagation();
+    const id = delBtn.dataset.del;
+    const customs = loadCustomPresets();
+    const p = customs.find(x => x.id === id);
+    const name = p ? p.name : id;
+    if (confirm(`Eliminare il preset "${name}"?`)) {
+      deleteCustomPreset(id);
+    }
+    return;
+  }
+  const b = ev.target.closest('[data-preset]');
+  if (!b) return;
+  const all = getAllPresets();
+  const preset = all.find(p => p.id === b.dataset.preset);
+  if (preset) loadPreset(preset);
+});
+
+$('#btnExportPresets').addEventListener('click', exportPresets);
+
+$('#btnImportPresets').addEventListener('click', () => {
+  $('#presetImportInput').click();
+});
+
+$('#presetImportInput').addEventListener('change', ev => {
+  const file = ev.target.files && ev.target.files[0];
+  if (file) {
+    importPresets(file);
+    ev.target.value = '';
+  }
+});
+
 /* ------------------------------------------------------------------- boot */
 function boot(){
   const warn = [];
   if (!navigator.bluetooth)
     warn.push('<b>Web Bluetooth is not available here.</b> Use desktop Chrome, Edge or Chrome on Android, over <code>https://</code> or <code>http://localhost</code>.');
   else if (!window.isSecureContext)
-    warn.push('<b>Insecure context.</b> Serve this page from <code>http://localhost</code> or HTTPS or the browser will block Bluetooth.');
-  warn.push('If the PeriPage only exposes Bluetooth Classic (SPP), no writable GATT characteristic will appear and the browser cannot reach it. Try “All Bluetooth devices” once — many PeriPage units also advertise a BLE endpoint.');
-  $('#secWarn').innerHTML = `<div class="warnbox">${warn.join('<hr style="border:0;border-top:1px solid rgba(255,176,32,.3);margin:7px 0">')}</div>`;
+    warn.push('<b>Insecure context.</b> Serve this page from <code>http://localhost</code> or HTTPS.');
+  warn.push('If the PeriPage only exposes Bluetooth Classic (SPP), no writable GATT characteristic will appear. Try "All Bluetooth devices".');
+  $('#secWarn').innerHTML = `<div class="warnbox">${warn.join('<hr style="border:0;border-top:1px solid rgba(245,158,11,.2);margin:7px 0">')}</div>`;
 
-  S.els = [
-    Object.assign(makeEl('text'), {text:'PERIPAGE A6', size:44, bold:true, align:'center', after:2}),
-    Object.assign(makeEl('rule'), {thickness:4}),
-    Object.assign(makeEl('text'), {text:'Web Bluetooth editor.\nType here, add photos, QR codes and barcodes, then hit Print.', size:22, align:'center'}),
-    Object.assign(makeEl('qr'),   {value:'https://developer.mozilla.org/docs/Web/API/Web_Bluetooth_API', size:220}),
-    Object.assign(makeEl('space'),{height:20}),
-  ];
+  buildPresets();
+
+  S.els = PRESETS[1].make(); // load 3D Filament preset by default to match design mockup
   uid = Math.max(...S.els.map(e=>e.id)) + 1;
   buildList(); drawGrid(); setConnected(false);
   ensureFonts().then(paint);
