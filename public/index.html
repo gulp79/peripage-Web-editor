@@ -119,9 +119,9 @@ label{color:var(--tx2); font-size:11px; display:block; margin-bottom:4px; font-w
 .swatch{display:flex; gap:5px}
 .swatch button{flex:1; padding:5px 0; font-size:11px; background:var(--bg)}
 .swatch button.on{background:var(--acc); border-color:var(--acc); color:#fff; font-weight:600}
-#emojiModal{position:fixed; inset:0; background:rgba(0,0,0,.65); z-index:50;
+#emojiModal, #presetModal{position:fixed; inset:0; background:rgba(0,0,0,.65); z-index:50;
   display:flex; align-items:center; justify-content:center; backdrop-filter:blur(4px)}
-#emojiModal[hidden]{display:none}
+#emojiModal[hidden], #presetModal[hidden]{display:none}
 .epanel{width:430px; max-width:92vw; max-height:74vh; background:var(--surface);
   border:1px solid var(--line); border-radius:10px; display:flex; flex-direction:column;
   box-shadow:0 24px 70px rgba(0,0,0,.7); overflow:hidden}
@@ -146,14 +146,18 @@ label{color:var(--tx2); font-size:11px; display:block; margin-bottom:4px; font-w
 .preset-save-form{margin-bottom:8px;background:var(--panel2);padding:8px;border-radius:6px;border:1px solid var(--line)}
 .preset-save-form input{font-size:11px;padding:5px 8px}
 .preset-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
-.preset-grid button{display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:8px 10px;text-align:left;line-height:1.3;background:var(--card);border:1px solid var(--line);position:relative}
+.preset-grid button{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;min-height:54px;padding:8px 10px;text-align:left;line-height:1.3;background:var(--card);border:1px solid var(--line);position:relative;border-radius:6px;overflow:hidden;transition:all .15s}
 .preset-grid button:hover{border-color:#3B82F6}
-.preset-grid button .pname{font-size:11.5px;font-weight:600;color:var(--tx);padding-right:40px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%}
-.preset-grid button .pdesc{font-size:10px;color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%}
-.preset-grid button .pbtns{position:absolute;top:3px;right:3px;display:flex;gap:2px;align-items:center}
-.preset-grid button .pact{width:18px;height:18px;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--tx2);cursor:pointer;border-radius:4px;transition:all .15s;line-height:1}
-.preset-grid button .pact:hover{color:var(--tx);background:var(--panel)}
-.preset-grid button .pact.pdel:hover{color:var(--err);background:rgba(239,68,68,0.18)}
+.preset-grid button .pname{font-size:11.5px;font-weight:600;color:var(--tx);padding-right:48px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%}
+.preset-grid button .pdesc{font-size:10px;color:var(--tx2);padding-right:48px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%;margin-top:2px}
+.preset-grid button .pbtns{position:absolute;top:5px;right:5px;display:flex;gap:3px;align-items:center;z-index:2}
+.preset-grid button .pact{width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:11px;cursor:pointer;border-radius:4px;transition:all .15s;line-height:1;border:1px solid transparent}
+.preset-grid button .pexp{color:#10B981;background:rgba(16,185,129,0.15);border-color:rgba(16,185,129,0.4)}
+.preset-grid button .pexp:hover{background:#10B981;color:#fff;box-shadow:0 0 8px rgba(16,185,129,0.4)}
+.preset-grid button .pdel{color:#EF4444;background:rgba(239,68,68,0.15);border-color:rgba(239,68,68,0.4)}
+.preset-grid button .pdel:hover{background:#EF4444;color:#fff;box-shadow:0 0 8px rgba(239,68,68,0.4)}
+.prow{transition:border-color .15s, background .15s}
+.prow:hover{border-color:#3B82F6; background:#1C2230}
 ::-webkit-scrollbar{width:6px;height:6px}
 ::-webkit-scrollbar-thumb{background:var(--line); border-radius:9999px}
 ::-webkit-scrollbar-thumb:hover{background:var(--acc)}
@@ -220,30 +224,36 @@ label{color:var(--tx2); font-size:11px; display:block; margin-bottom:4px; font-w
         <span class="chev">▶</span>
         <h2>Presets</h2>
         <span class="spacer"></span>
-        <button type="button" class="preset-add-btn" id="btnPresetToggle" title="Nuovo preset">+</button>
+        <button type="button" class="preset-add-btn" id="btnOpenPresetModal" title="Open Preset Manager" style="margin-right:4px;">⚙</button>
+        <button type="button" class="preset-add-btn" id="btnPresetToggle" title="Save current document as preset">＋</button>
       </div>
       <div id="presetBody" style="display:none">
-        <button type="button" id="btnShowSavePreset" class="primary" style="width:100%; font-size:11.5px; padding:6px 10px; margin-bottom:8px; display:flex; align-items:center; justify-content:center; gap:6px;">
-          <span>＋</span> Salva etichetta corrente come preset
-        </button>
+        <div style="display:flex; gap:6px; margin-bottom:8px;">
+          <button type="button" id="btnShowSavePreset" class="primary" style="flex:1; font-size:11.5px; padding:6px 8px; display:flex; align-items:center; justify-content:center; gap:5px;">
+            <span>＋</span> Save as Preset
+          </button>
+          <button type="button" id="btnManagePresets" class="mini" style="padding:6px 10px; font-size:11.5px; display:flex; align-items:center; gap:4px;" title="Manage all presets in modal">
+            <span>⚙</span> Manage
+          </button>
+        </div>
         <form id="presetSaveForm" class="preset-save-form" style="display:none;" onsubmit="event.preventDefault(); saveCurrentAsPreset();">
           <div style="display:flex; flex-direction:column; gap:6px;">
-            <input type="text" id="presetNameInput" placeholder="Nome preset (es. Etichetta Frigo)" maxlength="30" required>
-            <input type="text" id="presetDescInput" placeholder="Descrizione breve (opzionale)" maxlength="60">
+            <input type="text" id="presetNameInput" placeholder="Preset name (e.g. Freezer Label)" maxlength="30" required>
+            <input type="text" id="presetDescInput" placeholder="Short description (optional)" maxlength="60">
             <div style="display:flex; gap:6px;">
-              <button type="submit" id="btnPresetSave" class="primary" style="flex:1; font-size:11px; padding:5px 8px;">Salva preset</button>
-              <button type="button" id="btnPresetCancel" class="ghost" style="font-size:11px; padding:5px 8px;">Annulla</button>
+              <button type="submit" id="btnPresetSave" class="primary" style="flex:1; font-size:11px; padding:5px 8px;">Save Preset</button>
+              <button type="button" id="btnPresetCancel" class="ghost" style="font-size:11px; padding:5px 8px;">Cancel</button>
             </div>
           </div>
         </form>
         <div class="preset-grid" id="presetGrid"></div>
         <div class="preset-actions" style="margin-top:8px; display:flex; flex-direction:column; gap:6px;">
           <div style="display:flex; gap:6px;">
-            <button type="button" class="mini" id="btnExportPresets" style="flex:1" title="Scarica tutti i preset personalizzati">↓ Esporta preset</button>
-            <button type="button" class="mini" id="btnImportPresets" style="flex:1" title="Importa preset da file .json">↑ Importa preset</button>
+            <button type="button" class="mini" id="btnExportPresets" style="flex:1" title="Download all custom presets as a JSON file">↓ Export Presets</button>
+            <button type="button" class="mini" id="btnImportPresets" style="flex:1" title="Import presets from a JSON file">↑ Import Preset</button>
           </div>
-          <button type="button" class="mini ghost" id="btnExportCurrentPreset" style="width:100%; font-size:11px; border:1px dashed var(--line);" title="Esporta direttamente l'etichetta attualmente visibile come file preset .json">
-            ↓ Esporta etichetta corrente (.json)
+          <button type="button" class="mini ghost" id="btnExportCurrentPreset" style="width:100%; font-size:11px; border:1px dashed var(--line);" title="Export currently open label directly as a JSON preset file">
+            ↓ Export Current Label (.json)
           </button>
           <input type="file" id="presetImportInput" accept=".json,application/json" style="display:none">
         </div>
@@ -393,6 +403,28 @@ label{color:var(--tx2); font-size:11px; display:block; margin-bottom:4px; font-w
     </div>
     <div class="ecats" id="emojiCats"></div>
     <div class="egrid" id="emojiGrid"></div>
+  </div>
+</div>
+
+<div id="presetModal" hidden>
+  <div class="epanel" style="width:580px; max-width:94vw; max-height:82vh;">
+    <div class="ehead" style="justify-content:space-between; padding:12px 14px;">
+      <div style="display:flex; align-items:center; gap:8px;">
+        <span style="font-size:16px;">📁</span>
+        <strong style="font-size:13.5px; font-weight:600;">Preset Manager</strong>
+        <span id="presetModalCount" class="pill" style="font-size:11px;">0 presets</span>
+      </div>
+      <div style="display:flex; align-items:center; gap:6px;">
+        <button class="mini" id="btnModalImport" title="Import presets from JSON file">↑ Import</button>
+        <button class="mini" id="btnModalExportAll" title="Export all custom presets as JSON">↓ Export All</button>
+        <button class="mini" id="presetModalClose" style="font-size:14px; line-height:1; padding:3px 8px;" title="Close (Esc)">✕</button>
+      </div>
+    </div>
+    <div style="padding:10px 14px; border-bottom:1px solid var(--line); display:flex; gap:8px; align-items:center; background:rgba(22,26,36,0.6);">
+      <input type="text" id="presetSearch" placeholder="Search presets by name or description…" autocomplete="off" style="font-size:12px; padding:6px 10px;">
+      <button type="button" class="primary mini" id="btnModalSaveCurrent" style="white-space:nowrap; padding:6px 12px; font-size:11.5px;">＋ Save Current</button>
+    </div>
+    <div id="presetModalList" style="padding:12px 14px; overflow-y:auto; display:flex; flex-direction:column; gap:8px; flex:1;"></div>
   </div>
 </div>
 
@@ -1676,7 +1708,10 @@ $('#emojiModal').addEventListener('click', ev => {
   if (ev.target === $('#emojiModal')) closeEmoji();
 });
 document.addEventListener('keydown', ev => {
-  if (ev.key === 'Escape' && !$('#emojiModal').hidden) closeEmoji();
+  if (ev.key === 'Escape') {
+    if (!$('#emojiModal').hidden) closeEmoji();
+    if (!$('#presetModal').hidden) closePresetModal();
+  }
 });
 
 $('#btnConnect').onclick = connect;
@@ -1734,7 +1769,7 @@ const PRESETS = [
           invert: true, before: 0, after: 10,
         }),
         Object.assign(makeEl('text'), {
-          text: 'COLORE',
+          text: 'COLOR',
           family: "'Archivo Black'",
           size: 18, bold: false, align: 'left',
           invert: false, before: 8, after: 0,
@@ -1752,39 +1787,39 @@ const PRESETS = [
   },
   {
     id: 'freezer',
-    name: 'Congelatore',
-    desc: 'Etichetta cibi',
+    name: 'Freezer',
+    desc: 'Food storage label',
     make() {
       return [
         Object.assign(makeEl('text'), {
-          text: 'CONGELATORE',
+          text: 'FREEZER',
           family: "'Archivo Black'",
           size: 45, bold: true, align: 'center',
           invert: true, before: 0, after: 0,
         }),
         Object.assign(makeEl('text'), {
-          text: 'CIBO / SOSTANZA CONTENUTA',
+          text: 'FOOD / ITEM NAME',
           family: "'Archivo Black'",
           size: 16, bold: false, align: 'left',
           invert: false, before: 10, after: 0,
           tracking: 2,
         }),
         Object.assign(makeEl('text'), {
-          text: 'Nome del cibo',
+          text: 'Item Description',
           family: "'Archivo Black'",
           size: 38, bold: true, align: 'left',
           invert: false, before: 2, after: 6,
         }),
         Object.assign(makeEl('rule'), {style:'solid', thickness:3, inset:0, before:4, after:10}),
         Object.assign(makeEl('text'), {
-          text: 'DATA IMBUSTAMENTO / SIGILLATURA',
+          text: 'PACKAGING / EXPIRY DATE',
           family: "'Archivo Black'",
           size: 16, bold: false, align: 'left',
           invert: false, before: 0, after: 0,
           tracking: 2,
         }),
         Object.assign(makeEl('text'), {
-          text: 'GG/MM/AAAA',
+          text: 'DD/MM/YYYY',
           family: "'Archivo Black'",
           size: 38, bold: true, align: 'left',
           invert: false, before: 2, after: 10,
@@ -1806,7 +1841,7 @@ function loadCustomPresets() {
     }
     return [];
   } catch (err) {
-    log('Impossibile caricare i preset da localStorage: ' + err.message, 'w');
+    log('Failed to load presets from localStorage: ' + err.message, 'w');
     return [];
   }
 }
@@ -1817,7 +1852,7 @@ function saveCustomPresets(arr) {
     localStorage.setItem(PRESETS_KEY, JSON.stringify(payload));
     return true;
   } catch (err) {
-    log('Errore salvataggio preset in localStorage: ' + err.message, 'e');
+    log('Failed to save preset to localStorage: ' + err.message, 'e');
     return false;
   }
 }
@@ -1841,12 +1876,12 @@ function saveCurrentAsPreset() {
   const descInput = $('#presetDescInput');
   const name = (nameInput.value || '').trim();
   if (!name) {
-    log('Inserire un nome per il preset.', 'w');
+    log('Please enter a name for the preset.', 'w');
     nameInput.focus();
     return;
   }
   if (!S.els || !S.els.length) {
-    log('L\'etichetta è vuota: aggiungi almeno un elemento prima di salvare.', 'w');
+    log('Current document is empty: add at least one block before saving.', 'w');
     return;
   }
   const desc = (descInput.value || '').trim().slice(0, 60);
@@ -1870,7 +1905,7 @@ function saveCurrentAsPreset() {
     buildPresets();
     $('#presetHdr').classList.add('open');
     $('#presetBody').style.display = '';
-    log(`Preset "${newPreset.name}" salvato nella lista preset.`, 'o');
+    log(`Preset "${newPreset.name}" saved.`, 'o');
   }
 }
 
@@ -1881,7 +1916,7 @@ function deleteCustomPreset(id) {
   if (saveCustomPresets(filtered)) {
     buildPresets();
     const name = target ? target.name : id;
-    log(`Preset "${name}" eliminato.`, 'o');
+    log(`Preset "${name}" deleted.`, 'o');
   }
 }
 
@@ -1899,9 +1934,9 @@ function exportPresets() {
   const customs = loadCustomPresets();
   if (customs.length === 0) {
     if (S.els && S.els.length) {
-      if (confirm('Non ci sono ancora preset salvati nella lista.\nVuoi salvare e scaricare l\'etichetta corrente come preset?')) {
-        const defaultName = (S.els.find(e => e.type === 'text' && e.text)?.text || 'Etichetta').split('\n')[0].trim().slice(0, 30) || 'Mia Etichetta';
-        const name = prompt('Nome del preset:', defaultName);
+      if (confirm('No custom presets in the list yet.\nDo you want to save and export the current label as a preset?')) {
+        const defaultName = (S.els.find(e => e.type === 'text' && e.text)?.text || 'Label').split('\n')[0].trim().slice(0, 30) || 'My Preset';
+        const name = prompt('Preset name:', defaultName);
         if (!name) return;
         const cleanEls = S.els.map(e => {
           const c = { ...e };
@@ -1918,15 +1953,15 @@ function exportPresets() {
         saveCustomPresets(customs);
         buildPresets();
         downloadPresetJson(customs, 'peripage-presets.json');
-        log(`Preset "${newPreset.name}" salvato ed esportato.`, 'o');
+        log(`Preset "${newPreset.name}" saved and exported.`, 'o');
       }
     } else {
-      log('Nessun preset personalizzato salvato da esportare.', 'w');
+      log('No custom presets saved to export.', 'w');
     }
     return;
   }
   downloadPresetJson(customs, 'peripage-presets.json');
-  log(`Esportati ${customs.length} preset personalizzati.`, 'o');
+  log(`Exported ${customs.length} custom preset(s).`, 'o');
 }
 
 function exportSinglePreset(id) {
@@ -1935,16 +1970,16 @@ function exportSinglePreset(id) {
   if (!p) return;
   const slug = p.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'preset';
   downloadPresetJson([p], `peripage-preset-${slug}.json`);
-  log(`Preset "${p.name}" esportato.`, 'o');
+  log(`Preset "${p.name}" exported.`, 'o');
 }
 
 function exportCurrentLabel() {
   if (!S.els || !S.els.length) {
-    log('Nessun elemento presente: l\'etichetta è vuota.', 'w');
+    log('Current document is empty: add at least one block before exporting.', 'w');
     return;
   }
-  const defaultName = (S.els.find(e => e.type === 'text' && e.text)?.text || 'Etichetta').split('\n')[0].trim().slice(0, 30) || 'Mia Etichetta';
-  const name = prompt('Nome con cui salvare ed esportare l\'etichetta:', defaultName);
+  const defaultName = (S.els.find(e => e.type === 'text' && e.text)?.text || 'Label').split('\n')[0].trim().slice(0, 30) || 'My Preset';
+  const name = prompt('Name for the exported preset:', defaultName);
   if (!name) return;
   const cleanEls = S.els.map(e => {
     const c = { ...e };
@@ -1965,7 +2000,7 @@ function exportCurrentLabel() {
   $('#presetBody').style.display = '';
   const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'preset';
   downloadPresetJson([newPreset], `peripage-preset-${slug}.json`);
-  log(`Etichetta "${name}" salvata nei preset ed esportata.`, 'o');
+  log(`Label "${name}" saved as preset and exported.`, 'o');
 }
 
 function importPresets(file) {
@@ -1975,18 +2010,18 @@ function importPresets(file) {
     try {
       const data = JSON.parse(reader.result);
       if (!data || typeof data !== 'object') {
-        throw new Error('File JSON non valido');
+        throw new Error('Invalid JSON file');
       }
 
       let presetsToImport = [];
 
       if (Array.isArray(data)) {
         if (data.length > 0 && data[0].type) {
-          const autoName = file.name.replace(/\.[^/.]+$/, "").slice(0, 30) || 'Preset importato';
+          const autoName = file.name.replace(/\.[^/.]+$/, "").slice(0, 30) || 'Imported Preset';
           presetsToImport.push({
             id: 'custom-' + Date.now(),
             name: autoName,
-            desc: 'Importato da file',
+            desc: 'Imported from file',
             els: data
           });
         } else {
@@ -1995,21 +2030,21 @@ function importPresets(file) {
       } else if (Array.isArray(data.presets)) {
         presetsToImport = data.presets;
       } else if (Array.isArray(data.els)) {
-        const autoName = (data.name || file.name.replace(/\.[^/.]+$/, "") || 'Preset importato').slice(0, 30);
+        const autoName = (data.name || file.name.replace(/\.[^/.]+$/, "") || 'Imported Preset').slice(0, 30);
         presetsToImport.push({
           id: data.id || ('custom-' + Date.now()),
           name: autoName,
-          desc: data.desc || 'Importato da file',
+          desc: data.desc || 'Imported from file',
           els: data.els
         });
       } else if (data.preset && Array.isArray(data.preset.els)) {
         presetsToImport.push(data.preset);
       } else {
-        throw new Error('Formato non riconosciuto (manca array "presets" o "els")');
+        throw new Error('Unrecognized format (missing "presets" or "els" array)');
       }
 
       if (presetsToImport.length === 0) {
-        log('Il file selezionato non contiene alcun preset (array vuoto).', 'w');
+        log('The selected file contains 0 presets (empty list).', 'w');
         return;
       }
 
@@ -2039,7 +2074,7 @@ function importPresets(file) {
           return c;
         });
 
-        const pName = String(p.name || file.name.replace(/\.[^/.]+$/, "") || 'Preset importato').slice(0, 30);
+        const pName = String(p.name || file.name.replace(/\.[^/.]+$/, "") || 'Imported Preset').slice(0, 30);
         const pDesc = p.desc ? String(p.desc).slice(0, 60) : '';
 
         const importedObj = {
@@ -2060,28 +2095,28 @@ function importPresets(file) {
         buildPresets();
         $('#presetHdr').classList.add('open');
         $('#presetBody').style.display = '';
-        log(`Import completato: ${addedCount} preset aggiunti con successo.`, 'o');
+        log(`Import complete: ${addedCount} preset(s) added successfully.`, 'o');
 
-        if (lastAdded && confirm(`Preset "${lastAdded.name}" importato!\nVuoi caricarlo subito nell'editor?`)) {
+        if (lastAdded && confirm(`Preset "${lastAdded.name}" imported!\nDo you want to load it into the editor now?`)) {
           const all = getAllPresets();
           const target = all.find(x => x.id === lastAdded.id);
           if (target) loadPreset(target);
         }
       } else {
-        log(`Nessun preset valido importato (${skippedCount} non validi o vuoti).`, 'w');
+        log(`No valid presets imported (${skippedCount} invalid or empty).`, 'w');
       }
     } catch (err) {
-      log('Errore durante l\'import dei preset: ' + err.message, 'e');
+      log('Error importing presets: ' + err.message, 'e');
     }
   };
   reader.onerror = () => {
-    log('Errore lettura file preset.', 'e');
+    log('Error reading preset file.', 'e');
   };
   reader.readAsText(file);
 }
 
 function loadPreset(preset) {
-  if (S.els.length && !confirm(`Sostituire il documento corrente con il preset "${preset.name}"?`)) return;
+  if (S.els.length && !confirm(`Replace current document with preset "${preset.name}"?`)) return;
   S.els = preset.make();
   let nextId = 1;
   S.els.forEach(e => {
@@ -2094,22 +2129,101 @@ function loadPreset(preset) {
   });
   buildList();
   ensureFonts().then(paint);
-  log(`Preset "${preset.name}" caricato.`, 'o');
+  log(`Preset "${preset.name}" loaded.`, 'o');
+}
+
+function renderPresetModalList() {
+  const query = ($('#presetSearch')?.value || '').trim().toLowerCase();
+  const all = getAllPresets();
+  const filtered = all.filter(p => {
+    if (!query) return true;
+    return (p.name && p.name.toLowerCase().includes(query)) ||
+           (p.desc && p.desc.toLowerCase().includes(query));
+  });
+
+  const countBadge = $('#presetModalCount');
+  if (countBadge) {
+    const customCount = all.filter(p => p.isCustom).length;
+    countBadge.textContent = `${all.length} presets (${customCount} custom)`;
+  }
+
+  const listEl = $('#presetModalList');
+  if (!listEl) return;
+
+  if (filtered.length === 0) {
+    listEl.innerHTML = `<div class="empty" style="padding:40px 12px;">No presets matching "${esc(query)}".</div>`;
+    return;
+  }
+
+  listEl.innerHTML = filtered.map(p => {
+    const rawEls = typeof p.make === 'function' ? p.make() : (p.els || []);
+    const count = rawEls.length;
+    const typeCounts = {};
+    rawEls.forEach(e => { typeCounts[e.type] = (typeCounts[e.type] || 0) + 1; });
+    const summary = Object.entries(typeCounts).map(([k, v]) => `${v} ${k}`).join(', ') || 'empty';
+
+    return `
+      <div class="prow" style="display:flex; align-items:center; justify-content:space-between; gap:12px; padding:10px 12px; background:var(--card); border:1px solid var(--line); border-radius:8px;">
+        <div style="display:flex; flex-direction:column; gap:3px; flex:1; min-width:0;">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span class="pill" style="font-size:10px; font-weight:600; text-transform:uppercase; ${p.isCustom ? 'background:rgba(59,130,246,0.18); color:#60A5FA; border-color:rgba(59,130,246,0.3);' : 'background:rgba(148,163,184,0.12); color:#94A3B8;'}">${p.isCustom ? 'Custom' : 'Built-in'}</span>
+            <strong style="font-size:13px; color:var(--tx); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${esc(p.name)}</strong>
+          </div>
+          <div style="font-size:11px; color:var(--tx2); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+            ${esc(p.desc || 'No description')}
+          </div>
+          <div style="font-size:10px; color:#64748B;">
+            ${count} block${count === 1 ? '' : 's'} (${esc(summary)})
+          </div>
+        </div>
+        <div style="display:flex; align-items:center; gap:6px; flex-shrink:0;">
+          <button type="button" class="mini primary" data-modal-load="${esc(p.id)}" style="display:flex; align-items:center; gap:4px; padding:5px 9px;" title="Load this preset into the canvas editor">
+            <span>▶</span> Load
+          </button>
+          <button type="button" class="mini" data-modal-exp="${esc(p.id)}" style="color:#10B981; border:1px solid rgba(16,185,129,0.35); background:rgba(16,185,129,0.12); display:flex; align-items:center; gap:4px; padding:5px 9px;" title="Download this preset as a JSON file">
+            <span>⬇</span> Export
+          </button>
+          ${p.isCustom ? `
+          <button type="button" class="mini" data-modal-del="${esc(p.id)}" style="color:#EF4444; border:1px solid rgba(239,68,68,0.35); background:rgba(239,68,68,0.12); display:flex; align-items:center; gap:4px; padding:5px 9px;" title="Delete this custom preset">
+            <span>🗑</span> Delete
+          </button>
+          ` : `
+          <span class="pill" style="font-size:10px; color:#64748B; opacity:0.6; padding:4px 8px;">Default</span>
+          `}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function openPresetModal() {
+  $('#presetModal').hidden = false;
+  $('#presetSearch').value = '';
+  renderPresetModalList();
+  $('#presetSearch').focus();
+}
+
+function closePresetModal() {
+  $('#presetModal').hidden = true;
 }
 
 function buildPresets() {
   const all = getAllPresets();
   $('#presetGrid').innerHTML = all.map(p =>
-    `<button type="button" data-preset="${esc(p.id)}">` +
+    `<button type="button" data-preset="${esc(p.id)}" title="${esc(p.name)}${p.desc ? ' · ' + esc(p.desc) : ''}">` +
       `<span class="pname">${esc(p.name)}</span>` +
       `<span class="pdesc">${esc(p.desc)}</span>` +
       (p.isCustom ? `
         <div class="pbtns">
-          <span class="pact pexp" data-exp="${esc(p.id)}" title="Esporta questo preset (.json)">⬇</span>
-          <span class="pact pdel" data-del="${esc(p.id)}" title="Elimina preset">🗑</span>
+          <span class="pact pexp" data-exp="${esc(p.id)}" title="Export preset (.json)">⬇</span>
+          <span class="pact pdel" data-del="${esc(p.id)}" title="Delete preset">🗑</span>
         </div>` : '') +
     `</button>`
   ).join('');
+
+  if (!$('#presetModal').hidden) {
+    renderPresetModalList();
+  }
 }
 
 function togglePresetSaveForm(show) {
@@ -2147,6 +2261,15 @@ $('#btnShowSavePreset').addEventListener('click', () => {
   togglePresetSaveForm(true);
 });
 
+$('#btnManagePresets').addEventListener('click', () => {
+  openPresetModal();
+});
+
+$('#btnOpenPresetModal').addEventListener('click', ev => {
+  ev.stopPropagation();
+  openPresetModal();
+});
+
 $('#btnPresetCancel').addEventListener('click', () => {
   togglePresetSaveForm(false);
 });
@@ -2169,7 +2292,7 @@ $('#presetGrid').addEventListener('click', ev => {
     const customs = loadCustomPresets();
     const p = customs.find(x => x.id === id);
     const name = p ? p.name : id;
-    if (confirm(`Eliminare il preset "${name}"?`)) {
+    if (confirm(`Delete preset "${name}"?`)) {
       deleteCustomPreset(id);
     }
     return;
@@ -2199,6 +2322,51 @@ $('#presetImportInput').addEventListener('change', ev => {
   if (file) {
     importPresets(file);
     ev.target.value = '';
+  }
+});
+
+/* Modal interactions */
+$('#presetModalClose').onclick = closePresetModal;
+$('#presetModal').addEventListener('click', ev => {
+  if (ev.target === $('#presetModal')) closePresetModal();
+});
+$('#presetSearch').addEventListener('input', renderPresetModalList);
+$('#btnModalImport').addEventListener('click', () => {
+  $('#presetImportInput').click();
+});
+$('#btnModalExportAll').addEventListener('click', exportPresets);
+$('#btnModalSaveCurrent').addEventListener('click', () => {
+  closePresetModal();
+  togglePresetSaveForm(true);
+});
+
+$('#presetModalList').addEventListener('click', ev => {
+  const loadBtn = ev.target.closest('[data-modal-load]');
+  if (loadBtn) {
+    const id = loadBtn.dataset.modalLoad;
+    const preset = getAllPresets().find(p => p.id === id);
+    if (preset) {
+      loadPreset(preset);
+      closePresetModal();
+    }
+    return;
+  }
+  const expBtn = ev.target.closest('[data-modal-exp]');
+  if (expBtn) {
+    exportSinglePreset(expBtn.dataset.modalExp);
+    return;
+  }
+  const delBtn = ev.target.closest('[data-modal-del]');
+  if (delBtn) {
+    const id = delBtn.dataset.modalDel;
+    const customs = loadCustomPresets();
+    const p = customs.find(x => x.id === id);
+    const name = p ? p.name : id;
+    if (confirm(`Delete preset "${name}"?`)) {
+      deleteCustomPreset(id);
+      renderPresetModalList();
+    }
+    return;
   }
 });
 

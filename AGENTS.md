@@ -317,8 +317,8 @@ Stores user-created custom presets:
   "presets": [
     {
       "id": "custom-1748000000000",
-      "name": "Etichetta frigo",
-      "desc": "Cibo e scadenza",
+      "name": "Freezer Label",
+      "desc": "Food and expiry date",
       "els": [ /* array of serialized blocks */ ]
     }
   ]
@@ -329,7 +329,7 @@ Do not change or merge these keys casually.
 
 ### Preset and layout invariants
 
-- Built-in presets (`PRESETS`) are hardcoded in JavaScript and immutable at runtime (`default`, `filament3d`, `congelatore`).
+- Built-in presets (`PRESETS`) are hardcoded in JavaScript and immutable at runtime (`default`, `filament3d`, `freezer`).
 - Custom presets are loaded from `peripage-presets-v1` and displayed alongside built-in presets in `#presetGrid`.
 - Always strip non-serializable runtime properties (such as `_img`) before storing blocks in `localStorage` or exporting to JSON.
 - When loading presets (`loadPreset`) or saved layouts (`#btnLoad`), always reassign sequential integer `id`s to elements (`let nextId = 1; S.els.forEach(e => { e.id = nextId++; ... }); uid = nextId;`). Never rely on `Math.max(...els.map(e => e.id))` when elements might lack an `id`, as that produces `NaN` and corrupts block creation.
