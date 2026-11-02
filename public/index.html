@@ -143,15 +143,17 @@ label{color:var(--tx2); font-size:11px; display:block; margin-bottom:4px; font-w
 .preset-hdr.open .chev{transform:rotate(90deg)}
 .preset-add-btn{width:20px;height:20px;min-width:20px;padding:0;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:13px;line-height:1;background:var(--panel2);border:1px solid var(--line);color:var(--tx2);cursor:pointer;transition:all .15s}
 .preset-add-btn:hover{border-color:#3B82F6;color:var(--tx);background:#222838}
-.preset-save-form{display:grid;grid-template-columns:1fr 1fr auto;gap:6px;margin-bottom:8px}
+.preset-save-form{margin-bottom:8px;background:var(--panel2);padding:8px;border-radius:6px;border:1px solid var(--line)}
 .preset-save-form input{font-size:11px;padding:5px 8px}
 .preset-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
 .preset-grid button{display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:8px 10px;text-align:left;line-height:1.3;background:var(--card);border:1px solid var(--line);position:relative}
 .preset-grid button:hover{border-color:#3B82F6}
-.preset-grid button .pname{font-size:11.5px;font-weight:600;color:var(--tx);padding-right:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%}
+.preset-grid button .pname{font-size:11.5px;font-weight:600;color:var(--tx);padding-right:40px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%}
 .preset-grid button .pdesc{font-size:10px;color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%}
-.preset-grid button .pdel{position:absolute;top:4px;right:4px;width:18px;height:18px;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--tx2);cursor:pointer;border-radius:4px;transition:all .15s}
-.preset-grid button .pdel:hover{color:var(--err);background:rgba(239,68,68,0.15)}
+.preset-grid button .pbtns{position:absolute;top:3px;right:3px;display:flex;gap:2px;align-items:center}
+.preset-grid button .pact{width:18px;height:18px;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--tx2);cursor:pointer;border-radius:4px;transition:all .15s;line-height:1}
+.preset-grid button .pact:hover{color:var(--tx);background:var(--panel)}
+.preset-grid button .pact.pdel:hover{color:var(--err);background:rgba(239,68,68,0.18)}
 ::-webkit-scrollbar{width:6px;height:6px}
 ::-webkit-scrollbar-thumb{background:var(--line); border-radius:9999px}
 ::-webkit-scrollbar-thumb:hover{background:var(--acc)}
@@ -217,19 +219,33 @@ label{color:var(--tx2); font-size:11px; display:block; margin-bottom:4px; font-w
       <div class="preset-hdr" id="presetHdr">
         <span class="chev">▶</span>
         <h2>Presets</h2>
+        <span class="spacer"></span>
         <button type="button" class="preset-add-btn" id="btnPresetToggle" title="Nuovo preset">+</button>
       </div>
       <div id="presetBody" style="display:none">
-        <form id="presetSaveForm" class="preset-save-form" style="display:none" onsubmit="event.preventDefault(); saveCurrentAsPreset();">
-          <input type="text" id="presetNameInput" placeholder="Nome preset" maxlength="30" required>
-          <input type="text" id="presetDescInput" placeholder="Descrizione breve" maxlength="60">
-          <button type="submit" id="btnPresetSave" class="btn" style="padding:4px 10px; font-size:11px;">Salva</button>
+        <button type="button" id="btnShowSavePreset" class="primary" style="width:100%; font-size:11.5px; padding:6px 10px; margin-bottom:8px; display:flex; align-items:center; justify-content:center; gap:6px;">
+          <span>＋</span> Salva etichetta corrente come preset
+        </button>
+        <form id="presetSaveForm" class="preset-save-form" style="display:none;" onsubmit="event.preventDefault(); saveCurrentAsPreset();">
+          <div style="display:flex; flex-direction:column; gap:6px;">
+            <input type="text" id="presetNameInput" placeholder="Nome preset (es. Etichetta Frigo)" maxlength="30" required>
+            <input type="text" id="presetDescInput" placeholder="Descrizione breve (opzionale)" maxlength="60">
+            <div style="display:flex; gap:6px;">
+              <button type="submit" id="btnPresetSave" class="primary" style="flex:1; font-size:11px; padding:5px 8px;">Salva preset</button>
+              <button type="button" id="btnPresetCancel" class="ghost" style="font-size:11px; padding:5px 8px;">Annulla</button>
+            </div>
+          </div>
         </form>
         <div class="preset-grid" id="presetGrid"></div>
-        <div class="preset-actions" style="margin-top:8px; display:flex; gap:6px;">
-          <button type="button" class="mini" id="btnExportPresets" style="flex:1">↓ Esporta preset</button>
-          <button type="button" class="mini" id="btnImportPresets" style="flex:1">↑ Importa preset</button>
-          <input type="file" id="presetImportInput" accept=".json" style="display:none">
+        <div class="preset-actions" style="margin-top:8px; display:flex; flex-direction:column; gap:6px;">
+          <div style="display:flex; gap:6px;">
+            <button type="button" class="mini" id="btnExportPresets" style="flex:1" title="Scarica tutti i preset personalizzati">↓ Esporta preset</button>
+            <button type="button" class="mini" id="btnImportPresets" style="flex:1" title="Importa preset da file .json">↑ Importa preset</button>
+          </div>
+          <button type="button" class="mini ghost" id="btnExportCurrentPreset" style="width:100%; font-size:11px; border:1px dashed var(--line);" title="Esporta direttamente l'etichetta attualmente visibile come file preset .json">
+            ↓ Esporta etichetta corrente (.json)
+          </button>
+          <input type="file" id="presetImportInput" accept=".json,application/json" style="display:none">
         </div>
       </div>
     </div>
@@ -1617,14 +1633,20 @@ $('#btnLoad').onclick = () => {
     const d = JSON.parse(raw);
     S.width = d.width || 384; S.density = d.density ?? 1;
     S.els = d.els || [];
-    uid = Math.max(1, ...S.els.map(e => e.id)) + 1;
+    let nextId = 1;
+    S.els.forEach(e => {
+      e.id = nextId++;
+      e.collapsed = true;
+    });
+    uid = nextId;
     $('#paperW').value = String(S.width);
     $$('#density button').forEach(x => x.classList.toggle('on', +x.dataset.d === S.density));
-    S.els.forEach(e => e.collapsed = true);
     S.els.filter(e => e.type === 'image' && e.src).forEach(e => {
       const img = new Image(); img.onload = () => { e._img = img; paint(); }; img.src = e.src;
     });
-    buildList(); log('Layout loaded.', 'o');
+    buildList();
+    ensureFonts().then(paint);
+    log('Layout loaded.', 'o');
   }catch(e){ log('Load failed: ' + e.message, 'e'); }
 };
 $('#btnPng').onclick = () => {
@@ -1823,6 +1845,10 @@ function saveCurrentAsPreset() {
     nameInput.focus();
     return;
   }
+  if (!S.els || !S.els.length) {
+    log('L\'etichetta è vuota: aggiungi almeno un elemento prima di salvare.', 'w');
+    return;
+  }
   const desc = (descInput.value || '').trim().slice(0, 60);
   const cleanEls = S.els.map(e => {
     const c = { ...e };
@@ -1842,7 +1868,9 @@ function saveCurrentAsPreset() {
     descInput.value = '';
     $('#presetSaveForm').style.display = 'none';
     buildPresets();
-    log(`Preset "${newPreset.name}" salvato.`, 'o');
+    $('#presetHdr').classList.add('open');
+    $('#presetBody').style.display = '';
+    log(`Preset "${newPreset.name}" salvato nella lista preset.`, 'o');
   }
 }
 
@@ -1857,16 +1885,87 @@ function deleteCustomPreset(id) {
   }
 }
 
-function exportPresets() {
-  const customs = loadCustomPresets();
-  const payload = { version: 1, presets: customs };
+function downloadPresetJson(arr, filename) {
+  const payload = { version: 1, presets: arr };
   const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = 'peripage-presets.json';
+  a.download = filename || 'peripage-presets.json';
   a.click();
   setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+}
+
+function exportPresets() {
+  const customs = loadCustomPresets();
+  if (customs.length === 0) {
+    if (S.els && S.els.length) {
+      if (confirm('Non ci sono ancora preset salvati nella lista.\nVuoi salvare e scaricare l\'etichetta corrente come preset?')) {
+        const defaultName = (S.els.find(e => e.type === 'text' && e.text)?.text || 'Etichetta').split('\n')[0].trim().slice(0, 30) || 'Mia Etichetta';
+        const name = prompt('Nome del preset:', defaultName);
+        if (!name) return;
+        const cleanEls = S.els.map(e => {
+          const c = { ...e };
+          delete c._img;
+          return c;
+        });
+        const newPreset = {
+          id: 'custom-' + Date.now(),
+          name: name.slice(0, 30),
+          desc: '',
+          els: JSON.parse(JSON.stringify(cleanEls))
+        };
+        customs.push(newPreset);
+        saveCustomPresets(customs);
+        buildPresets();
+        downloadPresetJson(customs, 'peripage-presets.json');
+        log(`Preset "${newPreset.name}" salvato ed esportato.`, 'o');
+      }
+    } else {
+      log('Nessun preset personalizzato salvato da esportare.', 'w');
+    }
+    return;
+  }
+  downloadPresetJson(customs, 'peripage-presets.json');
   log(`Esportati ${customs.length} preset personalizzati.`, 'o');
+}
+
+function exportSinglePreset(id) {
+  const customs = loadCustomPresets();
+  const p = customs.find(x => x.id === id);
+  if (!p) return;
+  const slug = p.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'preset';
+  downloadPresetJson([p], `peripage-preset-${slug}.json`);
+  log(`Preset "${p.name}" esportato.`, 'o');
+}
+
+function exportCurrentLabel() {
+  if (!S.els || !S.els.length) {
+    log('Nessun elemento presente: l\'etichetta è vuota.', 'w');
+    return;
+  }
+  const defaultName = (S.els.find(e => e.type === 'text' && e.text)?.text || 'Etichetta').split('\n')[0].trim().slice(0, 30) || 'Mia Etichetta';
+  const name = prompt('Nome con cui salvare ed esportare l\'etichetta:', defaultName);
+  if (!name) return;
+  const cleanEls = S.els.map(e => {
+    const c = { ...e };
+    delete c._img;
+    return c;
+  });
+  const newPreset = {
+    id: 'custom-' + Date.now(),
+    name: name.slice(0, 30),
+    desc: '',
+    els: JSON.parse(JSON.stringify(cleanEls))
+  };
+  const customs = loadCustomPresets();
+  customs.push(newPreset);
+  saveCustomPresets(customs);
+  buildPresets();
+  $('#presetHdr').classList.add('open');
+  $('#presetBody').style.display = '';
+  const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'preset';
+  downloadPresetJson([newPreset], `peripage-preset-${slug}.json`);
+  log(`Etichetta "${name}" salvata nei preset ed esportata.`, 'o');
 }
 
 function importPresets(file) {
@@ -1875,47 +1974,101 @@ function importPresets(file) {
   reader.onload = () => {
     try {
       const data = JSON.parse(reader.result);
-      if (!data || typeof data !== 'object' || !Array.isArray(data.presets)) {
-        throw new Error('Formato non valido (manca array "presets")');
+      if (!data || typeof data !== 'object') {
+        throw new Error('File JSON non valido');
       }
+
+      let presetsToImport = [];
+
+      if (Array.isArray(data)) {
+        if (data.length > 0 && data[0].type) {
+          const autoName = file.name.replace(/\.[^/.]+$/, "").slice(0, 30) || 'Preset importato';
+          presetsToImport.push({
+            id: 'custom-' + Date.now(),
+            name: autoName,
+            desc: 'Importato da file',
+            els: data
+          });
+        } else {
+          presetsToImport = data;
+        }
+      } else if (Array.isArray(data.presets)) {
+        presetsToImport = data.presets;
+      } else if (Array.isArray(data.els)) {
+        const autoName = (data.name || file.name.replace(/\.[^/.]+$/, "") || 'Preset importato').slice(0, 30);
+        presetsToImport.push({
+          id: data.id || ('custom-' + Date.now()),
+          name: autoName,
+          desc: data.desc || 'Importato da file',
+          els: data.els
+        });
+      } else if (data.preset && Array.isArray(data.preset.els)) {
+        presetsToImport.push(data.preset);
+      } else {
+        throw new Error('Formato non riconosciuto (manca array "presets" o "els")');
+      }
+
+      if (presetsToImport.length === 0) {
+        log('Il file selezionato non contiene alcun preset (array vuoto).', 'w');
+        return;
+      }
+
       const existing = loadCustomPresets();
       const existingIds = new Set(existing.map(p => p.id));
       PRESETS.forEach(p => existingIds.add(p.id));
 
       let addedCount = 0;
       let skippedCount = 0;
+      let lastAdded = null;
 
-      for (const p of data.presets) {
-        if (!p || !p.id || !p.name || !Array.isArray(p.els)) {
+      for (let i = 0; i < presetsToImport.length; i++) {
+        const p = presetsToImport[i];
+        if (!p || !Array.isArray(p.els) || !p.els.length) {
           skippedCount++;
           continue;
         }
-        if (existingIds.has(p.id)) {
-          log(`Preset "${p.name}" (${p.id}) già presente, ignorato.`, 'w');
-          skippedCount++;
-          continue;
+
+        let pId = p.id ? String(p.id) : ('custom-' + (Date.now() + i));
+        if (existingIds.has(pId)) {
+          pId = 'custom-' + Date.now() + '-' + i;
         }
+
         const cleanEls = p.els.map(e => {
           const c = { ...e };
           delete c._img;
           return c;
         });
-        existing.push({
-          id: String(p.id),
-          name: String(p.name).slice(0, 30),
-          desc: p.desc ? String(p.desc).slice(0, 60) : '',
+
+        const pName = String(p.name || file.name.replace(/\.[^/.]+$/, "") || 'Preset importato').slice(0, 30);
+        const pDesc = p.desc ? String(p.desc).slice(0, 60) : '';
+
+        const importedObj = {
+          id: pId,
+          name: pName,
+          desc: pDesc,
           els: cleanEls
-        });
-        existingIds.add(p.id);
+        };
+
+        existing.push(importedObj);
+        existingIds.add(pId);
         addedCount++;
+        lastAdded = importedObj;
       }
 
       if (addedCount > 0) {
         saveCustomPresets(existing);
         buildPresets();
-        log(`Import completato: ${addedCount} preset aggiunti, ${skippedCount} saltati.`, 'o');
+        $('#presetHdr').classList.add('open');
+        $('#presetBody').style.display = '';
+        log(`Import completato: ${addedCount} preset aggiunti con successo.`, 'o');
+
+        if (lastAdded && confirm(`Preset "${lastAdded.name}" importato!\nVuoi caricarlo subito nell'editor?`)) {
+          const all = getAllPresets();
+          const target = all.find(x => x.id === lastAdded.id);
+          if (target) loadPreset(target);
+        }
       } else {
-        log(`Nessun nuovo preset importato (${skippedCount} saltati o già presenti).`, 'w');
+        log(`Nessun preset valido importato (${skippedCount} non validi o vuoti).`, 'w');
       }
     } catch (err) {
       log('Errore durante l\'import dei preset: ' + err.message, 'e');
@@ -1928,15 +2081,20 @@ function importPresets(file) {
 }
 
 function loadPreset(preset) {
-  if (S.els.length && !confirm(`Replace current document with preset "${preset.name}"?`)) return;
+  if (S.els.length && !confirm(`Sostituire il documento corrente con il preset "${preset.name}"?`)) return;
   S.els = preset.make();
-  uid = Math.max(1, ...S.els.map(e => e.id)) + 1;
-  S.els.forEach(e => e.collapsed = true);
+  let nextId = 1;
+  S.els.forEach(e => {
+    e.id = nextId++;
+    e.collapsed = true;
+  });
+  uid = nextId;
   S.els.filter(e => e.type === 'image' && e.src).forEach(e => {
     const img = new Image(); img.onload = () => { e._img = img; paint(); }; img.src = e.src;
   });
   buildList();
-  log(`Preset "${preset.name}" loaded.`, 'o');
+  ensureFonts().then(paint);
+  log(`Preset "${preset.name}" caricato.`, 'o');
 }
 
 function buildPresets() {
@@ -1945,9 +2103,34 @@ function buildPresets() {
     `<button type="button" data-preset="${esc(p.id)}">` +
       `<span class="pname">${esc(p.name)}</span>` +
       `<span class="pdesc">${esc(p.desc)}</span>` +
-      (p.isCustom ? `<span class="pdel" data-del="${esc(p.id)}" title="Elimina preset">🗑</span>` : '') +
+      (p.isCustom ? `
+        <div class="pbtns">
+          <span class="pact pexp" data-exp="${esc(p.id)}" title="Esporta questo preset (.json)">⬇</span>
+          <span class="pact pdel" data-del="${esc(p.id)}" title="Elimina preset">🗑</span>
+        </div>` : '') +
     `</button>`
   ).join('');
+}
+
+function togglePresetSaveForm(show) {
+  const form = $('#presetSaveForm');
+  const body = $('#presetBody');
+  const isClosed = form.style.display === 'none' || !form.style.display;
+  const shouldOpen = show !== undefined ? show : isClosed;
+
+  if (shouldOpen) {
+    $('#presetHdr').classList.add('open');
+    body.style.display = '';
+    form.style.display = 'block';
+    if (!$('#presetNameInput').value) {
+      const firstText = S.els.find(e => e.type === 'text' && e.text)?.text?.split('\n')[0]?.trim();
+      if (firstText) $('#presetNameInput').value = firstText.slice(0, 30);
+    }
+    $('#presetNameInput').focus();
+    $('#presetNameInput').select();
+  } else {
+    form.style.display = 'none';
+  }
 }
 
 $('#presetHdr').addEventListener('click', () => {
@@ -1957,18 +2140,20 @@ $('#presetHdr').addEventListener('click', () => {
 
 $('#btnPresetToggle').addEventListener('click', ev => {
   ev.stopPropagation();
-  const form = $('#presetSaveForm');
-  const body = $('#presetBody');
-  if (body.style.display === 'none') {
-    $('#presetHdr').classList.add('open');
-    body.style.display = '';
-    form.style.display = 'grid';
-    $('#presetNameInput').focus();
-  } else {
-    const isClosed = form.style.display === 'none' || !form.style.display;
-    form.style.display = isClosed ? 'grid' : 'none';
-    if (isClosed) $('#presetNameInput').focus();
-  }
+  togglePresetSaveForm();
+});
+
+$('#btnShowSavePreset').addEventListener('click', () => {
+  togglePresetSaveForm(true);
+});
+
+$('#btnPresetCancel').addEventListener('click', () => {
+  togglePresetSaveForm(false);
+});
+
+$('#presetSaveForm').addEventListener('submit', e => {
+  e.preventDefault();
+  saveCurrentAsPreset();
 });
 
 $('#btnPresetSave').addEventListener('click', e => {
@@ -1989,6 +2174,12 @@ $('#presetGrid').addEventListener('click', ev => {
     }
     return;
   }
+  const expBtn = ev.target.closest('[data-exp]');
+  if (expBtn) {
+    ev.stopPropagation();
+    exportSinglePreset(expBtn.dataset.exp);
+    return;
+  }
   const b = ev.target.closest('[data-preset]');
   if (!b) return;
   const all = getAllPresets();
@@ -1997,6 +2188,7 @@ $('#presetGrid').addEventListener('click', ev => {
 });
 
 $('#btnExportPresets').addEventListener('click', exportPresets);
+$('#btnExportCurrentPreset').addEventListener('click', exportCurrentLabel);
 
 $('#btnImportPresets').addEventListener('click', () => {
   $('#presetImportInput').click();

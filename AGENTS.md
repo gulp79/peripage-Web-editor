@@ -93,6 +93,7 @@ Key areas in `public/index.html`:
 - Web Bluetooth discovery and characteristic selection
 - PeriPage command framing and print transfer
 - editor UI generation and event delegation
+- preset catalogue, custom preset persistence, and JSON import/export
 - drag-to-reorder behavior
 - layout save/load and PNG export
 - application boot and default document
@@ -231,7 +232,7 @@ For every change, run or evaluate the relevant items below.
 - Buttons and inputs retain accessible labels or meaningful visible text.
 - User-provided strings inserted through HTML templates are escaped with the existing `esc()` helper.
 
-### Editor behavior
+### Editor and preset behavior
 
 - Add, edit, duplicate, delete, collapse, move, and drag operations still work.
 - The selected block and title summary remain correct.
@@ -240,6 +241,12 @@ For every change, run or evaluate the relevant items below.
 - Saved layouts can be loaded without losing supported fields.
 - New fields have safe defaults for older saved layouts.
 - Images still restore correctly from stored data URLs when applicable.
+- Custom presets can be saved from current label with prompt/form and appear in the preset grid.
+- Deleting a custom preset works after user confirmation and updates `localStorage`.
+- Exporting presets does not dump an empty `{ presets: [] }` file; if empty, it prompts to save/export the active label.
+- Individual preset export (⬇) and full bundle export generate valid JSON files.
+- Importing `.json` files supports bundles (`presets`), single presets (`els` / `name`), and raw layouts.
+- Loading any preset or saved layout assigns clean sequential IDs (`e.id = nextId++`) to prevent `uid` becoming `NaN`, and triggers `ensureFonts().then(paint)`.
 
 ### Rendering
 
@@ -291,21 +298,47 @@ Keep block data serializable. Do not store DOM nodes, canvas contexts, Bluetooth
 
 ## State and persistence compatibility
 
-The current local-storage key is:
+The application uses two separate localStorage keys:
 
+1. Active layout:
 ```text
 peripage-editor-v1
 ```
+Stores the active document layout: `{ width, density, els }`.
 
-Do not change it casually. If a breaking schema change is necessary:
+2. Custom presets catalogue:
+```text
+peripage-presets-v1
+```
+Stores user-created custom presets:
+```json
+{
+  "version": 1,
+  "presets": [
+    {
+      "id": "custom-1748000000000",
+      "name": "Etichetta frigo",
+      "desc": "Cibo e scadenza",
+      "els": [ /* array of serialized blocks */ ]
+    }
+  ]
+}
+```
 
-- introduce a versioned schema;
-- migrate old data when practical;
-- preserve unknown-but-safe fields where possible;
-- handle malformed storage without preventing application startup;
-- document the migration.
+Do not change or merge these keys casually.
 
-Avoid changing existing default values in a way that alters previously saved layouts unexpectedly.
+### Preset and layout invariants
+
+- Built-in presets (`PRESETS`) are hardcoded in JavaScript and immutable at runtime (`default`, `filament3d`, `congelatore`).
+- Custom presets are loaded from `peripage-presets-v1` and displayed alongside built-in presets in `#presetGrid`.
+- Always strip non-serializable runtime properties (such as `_img`) before storing blocks in `localStorage` or exporting to JSON.
+- When loading presets (`loadPreset`) or saved layouts (`#btnLoad`), always reassign sequential integer `id`s to elements (`let nextId = 1; S.els.forEach(e => { e.id = nextId++; ... }); uid = nextId;`). Never rely on `Math.max(...els.map(e => e.id))` when elements might lack an `id`, as that produces `NaN` and corrupts block creation.
+- Always call `ensureFonts().then(paint)` after loading a preset to ensure web fonts used by the template are loaded and painted.
+- Preset import (`importPresets`) must tolerate different JSON structures:
+  - Bundle format: `{ version: 1, presets: [...] }`
+  - Single preset format: `{ name: "...", els: [...] }`
+  - Exported layout format: `{ els: [...] }` or raw block arrays `[ {...} ]`
+- If an exported file or imported file is empty, provide actionable feedback via `log()` rather than silently failing.
 
 ## Security and privacy
 
