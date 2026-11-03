@@ -202,26 +202,29 @@
       </div>
       <div class="f grid2">
         <div><label>Feed after (px)</label><input type="number" id="feed" value="80" min="0" max="255" style="font-family:JetBrains Mono"></div>
-        <div><label>Rows / packet</label><input type="number" id="chunkRows" value="48" min="8" max="255" style="font-family:JetBrains Mono"></div>
+        <div><label>Rows / packet</label><input type="number" id="chunkRows" value="255" min="8" max="255" style="font-family:JetBrains Mono"></div>
       </div>
       <div class="f">
         <label>Transfer mode</label>
         <select id="txMode" style="font-size:11.5px">
-          <option value="rows" selected>Row by row (matches reference)</option>
-          <option value="bulk">Bulk packets (faster)</option>
+          <option value="rows">Row by row (matches reference)</option>
+          <option value="bulk" selected>Bulk packets (faster)</option>
         </select>
       </div>
       <div class="f grid2">
         <div><label>BLE packet (bytes)</label>
           <select id="mtu" style="font-family:JetBrains Mono; font-size:11.5px">
             <option value="20">20 (safest)</option>
-            <option value="100">100</option>
-            <option value="180" selected>180</option>
+            <option value="100" selected>100</option>
+            <option value="120">120</option>
+            <option value="128">128</option>
+            <option value="160">160</option>
+            <option value="180">180</option>
             <option value="244">244</option>
             <option value="500">500</option>
           </select>
         </div>
-        <div><label>Delay (ms)</label><input type="number" id="delay" value="18" min="0" max="500" style="font-family:JetBrains Mono"></div>
+        <div><label>Delay (ms)</label><input type="number" id="delay" value="12" min="0" max="500" style="font-family:JetBrains Mono"></div>
       </div>
     </div>
 
