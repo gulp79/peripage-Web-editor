@@ -6,7 +6,7 @@ This repository contains a browser-based editor and print client for PeriPage th
 
 The application:
 
-- runs entirely in the browser;
+- runs entirely in the browser as a modular static web application;
 - connects to the printer through the Web Bluetooth API;
 - composes text, images, QR codes, barcodes, dividers, spacers, and gift tags;
 - rasterizes the composition to a 1-bit monochrome bitmap at the printer's native width;
@@ -14,11 +14,11 @@ The application:
 - stores layouts only in the browser's `localStorage`;
 - has no application backend, database, or server-side Bluetooth component.
 
-The production target for this fork is a static site served by Nginx over HTTPS. The production target is a static site served by Nginx over HTTPS. The repository contains no cloud-platform deployment configuration or production application server.
+The production target for this fork is a static site served by Nginx over HTTPS. The repository contains no cloud-platform deployment configuration or production application server.
 
 ## Repository layout
 
-The repository is intentionally minimal:
+The repository is organized into static HTML, stylesheet, and native ES modules under `public/`:
 
 ```text
 .
@@ -27,12 +27,36 @@ The repository is intentionally minimal:
 ├── AGENTS.md
 ├── README.md
 └── public/
+    ├── css/
+    │   └── app.css
+    ├── js/
+    │   ├── app.js
+    │   ├── bluetooth.js
+    │   ├── constants.js
+    │   ├── dom.js
+    │   ├── persistence.js
+    │   ├── presets_template.js
+    │   ├── presets.js
+    │   ├── raster.js
+    │   ├── state.js
+    │   └── ui.js
     └── index.html
 ```
 
 Important files:
 
-- `public/index.html`: the complete application, including HTML, CSS, and JavaScript.
+- `public/index.html`: the HTML markup, modals, and asset references (no inline styles or application scripts).
+- `public/css/app.css`: application stylesheet and responsive styling.
+- `public/js/app.js`: application entry point, composition root, and boot logic.
+- `public/js/constants.js`: shared immutable definitions, font catalogues, emoji tables, UUIDs, and storage keys.
+- `public/js/dom.js`: DOM query shortcuts (`$`, `$$`) and HTML escaping helper (`esc`).
+- `public/js/state.js`: global application state `S`, Bluetooth state `BT`, ID tracking, and `makeEl()` block factory.
+- `public/js/presets_template.js`: built-in preset definitions (`default`, `filament3d`, `freezer`).
+- `public/js/raster.js`: dithering, luminance, text wrapping, gift-card geometry, element rendering, composition buffer, preview painting, and row packing.
+- `public/js/bluetooth.js`: Web Bluetooth discovery, GATT connection, characteristic scoring, command framing (`CMD`), and ESC/POS raster transmission.
+- `public/js/presets.js`: custom preset storage, import/export JSON, preset modal management, and preset loader.
+- `public/js/persistence.js`: active layout save/load in `localStorage` and PNG canvas export.
+- `public/js/ui.js`: form controls generation, block list rendering (`buildList`), emoji picker, Pointer Events drag-and-drop, and UI event listeners.
 - `README.md`: project documentation, protocol notes, browser requirements, troubleshooting, and deployment guidance.
 - `.gitignore`: files and directories intentionally excluded from version control.
 - `AGENTS.md`: instructions for coding agents working on this repository.
@@ -45,17 +69,39 @@ The deployed site consists of the contents of `public/`. Do not move `index.html
 
 1. Keep the application static and client-side by default.
 2. Do not introduce Node.js, Python, PHP, a database, or an API server into the production runtime unless the requested feature genuinely requires one.
-3. Do not add a frontend framework merely to implement a small change. The current application is intentionally dependency-light and single-file.
+3. Do not add a frontend framework or bundler merely to implement a small change. The application uses browser-native ES modules and plain CSS.
 4. Preserve direct browser-to-printer communication. Nginx only serves static files and must never be treated as the Bluetooth endpoint.
 5. Preserve support for HTTPS and `http://localhost`. Web Bluetooth must not be expected to work from an ordinary insecure LAN origin such as `http://192.168.x.x`.
 6. Preserve compatibility with Chromium-based browsers that implement Web Bluetooth. Do not claim support for browsers that do not expose `navigator.bluetooth`.
 7. Treat BLE writes as hardware-sensitive. Avoid refactoring Bluetooth transport, packet framing, delays, row boundaries, UUID selection, or reset behavior without focused testing.
 8. Never add secrets, printer identifiers, Bluetooth addresses, API tokens, or personal layout data to the repository.
-9. Keep the repository minimal: application changes normally belong in `public/index.html`, while documentation changes belong in `README.md` or `AGENTS.md`.
+9. Keep the repository minimal: application changes normally belong in the modular files under `public/`, while documentation changes belong in `README.md` or `AGENTS.md`.
+
+## Module architecture and dependency direction
+
+The ES modules use relative imports without a bundler. Modules adhere to a clear directional hierarchy:
+
+```text
+Dependency direction
+constants.js, state.js, dom.js
+            ↓
+presets_template.js
+            ↓
+raster.js, persistence.js, bluetooth.js, presets.js
+            ↓
+ui.js
+            ↓
+app.js
+```
+
+Rules:
+- Low-level modules (`constants`, `state`, `dom`) do not import higher-level modules (`raster`, `bluetooth`, `ui`, `app`).
+- To prevent circular dependencies between `presets.js`/`persistence.js` and `ui.js`, callbacks (such as `setOnPresetLoaded` and `onLoaded`) or dependency injection are used.
+- Modules avoid publishing unnecessary globals on `window`. Classic libraries (`QRious`, `JsBarcode`) are verified on `window` before boot.
 
 ## Current application design
 
-The application state is held in the global `S` object. Content is represented as an ordered array of blocks in `S.els`.
+The application state is held in the global `S` object in `public/js/state.js`. Content is represented as an ordered array of blocks in `S.els`.
 
 Current block types include:
 
@@ -70,35 +116,17 @@ Current block types include:
 The main rendering pipeline is:
 
 ```text
-block state
-  -> renderEl()
+block state (state.js)
+  -> renderEl() (raster.js)
   -> per-block 1-bit raster
-  -> compose()
-  -> LAST mono buffer
-  -> canvas preview or packRows()
-  -> printMono()
-  -> BLE writes
+  -> compose() (raster.js)
+  -> LAST mono buffer (raster.js)
+  -> canvas preview or packRows() (raster.js)
+  -> printMono() (bluetooth.js)
+  -> BLE writes (bluetooth.js)
 ```
 
-Key areas in `public/index.html`:
-
-- CSS and responsive layout
-- font catalogue and font loading
-- default block models in `makeEl()`
-- image luminance and dithering
-- text wrapping and element rasterization
-- gift-tag rendering
-- full-document composition and preview
-- ESC/POS row packing
-- Web Bluetooth discovery and characteristic selection
-- PeriPage command framing and print transfer
-- editor UI generation and event delegation
-- preset catalogue, custom preset persistence, and JSON import/export
-- drag-to-reorder behavior
-- layout save/load and PNG export
-- application boot and default document
-
-Before changing a feature, trace both its UI state and rasterization path. A control that appears correctly in the editor but is not consumed by `renderEl()` has no effect on printed output.
+Before changing a feature, trace both its UI state and rasterization path across the relevant modules. A control that appears correctly in the editor (`ui.js`) but is not consumed by `renderEl()` in `raster.js` has no effect on printed output.
 
 ## Hardware and protocol invariants
 
@@ -116,7 +144,7 @@ Unless a task explicitly asks to investigate printer protocol behavior, preserve
 - If multiple writable characteristics exist, manual selection and characteristic probing must remain available.
 - Web Bluetooth supports BLE GATT only. It cannot communicate with Bluetooth Classic SPP/RFCOMM-only printer revisions.
 
-When changing transport code, identify whether the change affects:
+When changing transport code in `public/js/bluetooth.js`, identify whether the change affects:
 
 - discovery filters;
 - optional service UUIDs;
@@ -133,7 +161,7 @@ Explain these effects in the final summary.
 
 ## External dependencies
 
-The current page loads resources from external CDNs, including Google Fonts, QRious, and JsBarcode.
+The application loads resources from external CDNs, including Google Fonts, QRious, and JsBarcode.
 
 When modifying dependencies:
 
@@ -154,9 +182,9 @@ Before making changes:
 
 1. Read `AGENTS.md` and the relevant sections of `README.md`.
 2. Inspect the actual repository tree.
-3. Read the relevant portions of `public/index.html` rather than assuming framework conventions.
-4. Search for all references to a state property, block type, DOM ID, UUID, command, or function being changed.
-5. Determine whether the request affects only UI, only rasterization, only Bluetooth transport, or multiple layers.
+3. Read the relevant modular files rather than assuming framework conventions.
+4. Search for all references to a state property, block type, DOM ID, UUID, command, or function across all modules under `public/js/`.
+5. Determine whether the request affects only UI (`ui.js`), only rasterization (`raster.js`), only Bluetooth transport (`bluetooth.js`), state/presets/persistence (`state.js`, `presets.js`, `persistence.js`), or multiple layers.
 
 Do not edit generated files, minified vendor files, or deployment configuration unless the task requires it.
 
@@ -195,27 +223,21 @@ http://localhost:8765/
 
 `localhost` is intentionally used because Web Bluetooth requires a secure context and browsers treat localhost as trustworthy for development.
 
-Do not test Bluetooth by opening `public/index.html` through `file://`, and do not add a server script merely as a shortcut for the command above.
+Do not test Bluetooth by opening `public/index.html` through `file://` (ES modules and Web Bluetooth are blocked on `file://`), and do not add a server script merely as a shortcut for the command above.
 
 ### Static syntax check
 
-Because the JavaScript is inline, extract it and run a parser check after JavaScript changes:
+Verify all JavaScript modules directly with Node.js parser checks:
 
-```bash
-python3 - <<'PY'
-from pathlib import Path
-import re
-
-html = Path('public/index.html').read_text(encoding='utf-8')
-scripts = re.findall(r'<script(?:\s[^>]*)?>(.*?)</script>', html, flags=re.S | re.I)
-inline = [s for s in scripts if s.strip()]
-Path('/tmp/peripage-inline.js').write_text('\n'.join(inline), encoding='utf-8')
-print(f'extracted {len(inline)} inline script block(s)')
-PY
-node --check /tmp/peripage-inline.js
+```powershell
+# Windows PowerShell
+Get-ChildItem public\js\*.js | ForEach-Object { node --check $_.FullName }
 ```
 
-External `<script src="...">` tags are not included by this extraction.
+```bash
+# macOS / Linux
+find public/js -type f -name '*.js' -print0 | xargs -0 -n1 node --check
+```
 
 If Node.js is unavailable, at minimum inspect the browser console after loading the page. Do not claim syntax validation was performed if it was not.
 
@@ -225,12 +247,12 @@ For every change, run or evaluate the relevant items below.
 
 ### General UI
 
-- The page loads without JavaScript errors.
+- The page loads without JavaScript errors or missing imports.
 - Existing default blocks render.
 - Controls remain usable at common desktop widths.
 - Scrolling continues to work in all three columns.
 - Buttons and inputs retain accessible labels or meaningful visible text.
-- User-provided strings inserted through HTML templates are escaped with the existing `esc()` helper.
+- User-provided strings inserted through HTML templates are escaped with `esc()`.
 
 ### Editor and preset behavior
 
@@ -251,7 +273,7 @@ For every change, run or evaluate the relevant items below.
 ### Rendering
 
 - Preview dimensions match the selected paper width.
-- Printed raster and preview derive from the same mono buffer.
+- Printed raster and preview derive from the same mono buffer in `raster.js`.
 - Black/white polarity is unchanged.
 - Text wrapping does not overflow the paper width.
 - QR modules remain aligned to integer printer dots.
@@ -281,17 +303,17 @@ At minimum, target current desktop Chrome or Edge and Chrome on Android when mob
 
 ## Adding or changing block types
 
-When adding a new block type, update every relevant layer:
+When adding a new block type, update every relevant layer across the modules:
 
-1. Add a default model in `makeEl(type)`.
-2. Add an editor button or another creation path.
-3. Add a label/color style if needed.
-4. Add a summary in `title(el)`.
-5. Add controls in `bodyFor(el)`.
-6. Add rasterization in `renderEl(el, W)` or a dedicated helper.
+1. Add a default model in `makeEl(type)` in `public/js/state.js`.
+2. Add an editor button or creation path in `public/index.html` (inside `.addbar`).
+3. Add a label/color badge style in `public/css/app.css` (`.item.t-[type] .kind`).
+4. Add a title summary in `title(el)` in `public/js/ui.js`.
+5. Add controls in `bodyFor(el)` in `public/js/ui.js`.
+6. Add rasterization in `renderEl(el, W)` in `public/js/raster.js` (or a helper).
 7. Ensure `before` and `after` spacing semantics are consistent.
-8. Ensure duplicate, delete, reorder, save, load, and PNG export work.
-9. Ensure old saved layouts still load.
+8. Ensure duplicate, delete, reorder, save, load, and PNG export work (`ui.js`, `persistence.js`).
+9. Ensure old saved layouts still load safely.
 10. Document the new block in `README.md`.
 
 Keep block data serializable. Do not store DOM nodes, canvas contexts, Bluetooth objects, or other non-serializable runtime objects in saved layout data. Runtime-only properties should use a clear convention such as the existing `_img` property and must be removed before serialization.
@@ -329,10 +351,10 @@ Do not change or merge these keys casually.
 
 ### Preset and layout invariants
 
-- Built-in presets (`PRESETS`) are hardcoded in JavaScript and immutable at runtime (`default`, `filament3d`, `freezer`).
+- Built-in presets (`PRESETS` in `public/js/presets_template.js`) are immutable at runtime (`default`, `filament3d`, `freezer`).
 - Custom presets are loaded from `peripage-presets-v1` and displayed alongside built-in presets in `#presetGrid`.
 - Always strip non-serializable runtime properties (such as `_img`) before storing blocks in `localStorage` or exporting to JSON.
-- When loading presets (`loadPreset`) or saved layouts (`#btnLoad`), always reassign sequential integer `id`s to elements (`let nextId = 1; S.els.forEach(e => { e.id = nextId++; ... }); uid = nextId;`). Never rely on `Math.max(...els.map(e => e.id))` when elements might lack an `id`, as that produces `NaN` and corrupts block creation.
+- When loading presets (`loadPreset`) or saved layouts (`loadLayout`), always reassign sequential integer `id`s to elements (`let nextId = 1; S.els.forEach(e => { e.id = nextId++; ... }); setUid(nextId);`). Never rely on `Math.max(...els.map(e => e.id))` when elements might lack an `id`, as that produces `NaN` and corrupts block creation.
 - Always call `ensureFonts().then(paint)` after loading a preset to ensure web fonts used by the template are loaded and painted.
 - Preset import (`importPresets`) must tolerate different JSON structures:
   - Bundle format: `{ version: 1, presets: [...] }`
@@ -351,7 +373,7 @@ This is a static application, but browser security still matters.
 - Do not add analytics, telemetry, or remote logging without explicit approval.
 - Do not request broader Bluetooth permissions or services than required.
 - Do not attempt to bypass the Web Bluetooth user-gesture or secure-context requirements.
-- If adding a Content Security Policy, account for inline script/style usage or refactor them deliberately. Do not deploy a policy that silently breaks the editor.
+- With stylesheets and scripts modularized into static files under `public/css/` and `public/js/`, a strict Content Security Policy can be deployed without `unsafe-inline` if CDN sources for fonts and vendor libraries are permitted.
 
 ## Nginx deployment target
 
@@ -399,17 +421,17 @@ Agents must not introduce any of the following by default:
 - a generated `dist/` directory;
 - a duplicate root-level `index.html`.
 
-If a requested feature appears to require tooling or a new dependency, first determine whether it can be implemented directly in `public/index.html` or with static assets under `public/`. Introduce build tooling only when the user explicitly approves that architectural change.
+If a requested feature appears to require tooling or a new dependency, first determine whether it can be implemented directly with static assets under `public/`. Introduce build tooling only when the user explicitly approves that architectural change.
 
 Development commands are allowed to use tools already installed on the workstation for validation, but such tools must not become production dependencies unless explicitly requested.
 
 ## Coding conventions
 
-- Use plain HTML, CSS, and modern browser JavaScript consistent with the existing file.
-- Keep strict mode enabled.
+- Use plain HTML, CSS, and modern browser JavaScript consistent with the existing codebase.
+- Keep strict mode enabled (ES modules execute in strict mode by default).
 - Prefer `const`; use `let` only for reassigned bindings.
 - Use `async`/`await` for asynchronous Bluetooth and font operations.
-- Preserve the established `$` and `$$` selector helpers unless refactoring the whole application is explicitly requested.
+- Preserve the established `$` and `$$` selector helpers.
 - Keep user input clamped before it affects dimensions, packet sizes, or printer commands.
 - Use typed arrays for raster and protocol data.
 - Avoid per-pixel object allocation in rendering loops.
@@ -437,10 +459,10 @@ Do not optimize Bluetooth throughput by removing delays or increasing packet siz
 For each requested change:
 
 1. Restate the concrete objective internally and identify affected layers.
-2. Inspect the relevant code and all call sites.
+2. Inspect the relevant code and all call sites across modules.
 3. Make a focused patch.
-4. Run available static checks.
-5. Run the app locally when possible.
+4. Run available static checks (`node --check`).
+5. Run the app locally via a static server.
 6. Test the affected UI/rendering behavior.
 7. Test physical printing when the change touches protocol or BLE and hardware is available.
 8. Update documentation when behavior, dependencies, browser requirements, deployment, or supported block types change.

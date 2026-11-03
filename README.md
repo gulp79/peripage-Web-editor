@@ -1,12 +1,35 @@
 # PeriPage A6 Web Editor
 
-A single-file browser application that composes a receipt and prints it straight to a
+A static browser application that composes a receipt and prints it straight to a
 PeriPage A6 or A6 Mini thermal printer over **Web Bluetooth**. No native app, no driver,
 no installation.
 
-The application is a static web page (`public/index.html`) that must be served over
-**HTTPS** from a web server. It connects directly from the browser to the printer via
-BLE GATT — the server only delivers the page and plays no role in Bluetooth communication.
+The site is built with static HTML, CSS, and browser-native ES modules under `public/`.
+It must be served over **HTTPS** (or `http://localhost` during development) from a web server.
+It connects directly from the browser to the printer via BLE GATT — the server only delivers
+the static files and plays no role in Bluetooth communication.
+
+## Project structure
+
+The application is structured into modular static files without a build step:
+
+```text
+public/
+├── index.html              # Main HTML markup, modals, and asset links
+├── css/
+│   └── app.css             # Application stylesheet and responsive layout
+└── js/
+    ├── app.js              # Application entry point, composition root, and boot
+    ├── bluetooth.js        # Web Bluetooth discovery, GATT transfer, and print commands
+    ├── constants.js        # Shared immutable definitions, fonts, emojis, and UUIDs
+    ├── dom.js              # DOM query selectors ($, $$) and HTML escaper
+    ├── persistence.js      # LocalStorage layout saving/loading and PNG export
+    ├── presets.js          # Custom presets, JSON import/export, and preset modal
+    ├── presets_template.js # Built-in preset definitions (Default, 3D Filament, Freezer)
+    ├── raster.js           # 1-bit dithering, card framing, composition, and preview
+    ├── state.js            # Global state S, BT state, ID tracking, and makeEl factory
+    └── ui.js               # Editor UI controls, list rendering, emoji picker, drag-and-drop
+```
 
 ## Requirements
 
@@ -24,9 +47,10 @@ platforms. Safari and Firefox do not implement the API and cannot use this appli
 
 ### Secure context
 
-`file://` does not work. Chrome exposes `navigator.bluetooth` only on `https://` or
-`http://localhost`. A plain LAN address such as `http://192.168.1.5` is not a secure
-context — the browser hides Bluetooth entirely at that origin with no error message.
+`file://` does not work (both Web Bluetooth and browser ES module imports are restricted on `file://`).
+Chrome exposes `navigator.bluetooth` only on `https://` or `http://localhost`. A plain LAN
+address such as `http://192.168.1.5` is not a secure context — the browser hides Bluetooth
+entirely at that origin with no error message.
 
 This means:
 
@@ -35,8 +59,8 @@ This means:
 
 ## Deployment
 
-The repository contains only static files. Copy the contents of `public/` to any HTTPS
-web server.
+The repository contains only static files. Copy the **entire contents of `public/`** to any HTTPS
+web server root.
 
 ### Nginx example
 
@@ -62,18 +86,23 @@ server {
     location / {
         try_files $uri $uri/ /index.html;
     }
+
+    # Serve index.html without aggressive immutable caching so asset updates propagate
+    location = /index.html {
+        add_header Cache-Control "no-cache, must-revalidate";
+    }
 }
 ```
 
-Place `public/index.html` in `/var/www/peripage/` and reload Nginx.
+Copy all files and folders from `public/` into `/var/www/peripage/` and reload Nginx.
 HTTPS is mandatory — without it the Connect button cannot function.
 
 ### Local development
 
-No build step or package manager is required.
+No build step or package manager is required. Run a local static server from the repository root:
 
 ```powershell
-# Windows
+# Windows PowerShell
 py -m http.server 8765 --bind 127.0.0.1 --directory public
 ```
 
@@ -86,19 +115,16 @@ Open `http://localhost:8765/` in Chrome or Edge.
 
 ### Syntax check
 
-After editing the inline JavaScript, extract and parse it with:
+All JavaScript modules can be checked directly with Node.js:
+
+```powershell
+# Windows PowerShell
+Get-ChildItem public\js\*.js | ForEach-Object { node --check $_.FullName }
+```
 
 ```bash
-python3 - <<'PY'
-from pathlib import Path
-import re
-html = Path('public/index.html').read_text(encoding='utf-8')
-scripts = re.findall(r'<script(?:\s[^>]*)?>(.*?)</script>', html, flags=re.S | re.I)
-inline = [s for s in scripts if s.strip()]
-Path('/tmp/peripage-inline.js').write_text('\n'.join(inline), encoding='utf-8')
-print(f'extracted {len(inline)} inline script block(s)')
-PY
-node --check /tmp/peripage-inline.js
+# macOS / Linux
+find public/js -type f -name '*.js' -print0 | xargs -0 -n1 node --check
 ```
 
 ## Blocks
@@ -166,7 +192,7 @@ Framing follows the reference driver exactly:
 
 A verified transcript for three rows per block:
 
-```
+```text
 10ff100001                        density
 10fffe01 000000000000000000000000 reset
 1d76300030000300                  block: 48 bytes/row, 3 rows
