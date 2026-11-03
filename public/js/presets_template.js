@@ -14,7 +14,7 @@ export const PRESETS = [
         Object.assign(makeEl('text'),  {text:'PERIPAGE A6', size:44, bold:true, align:'center', after:2}),
         Object.assign(makeEl('rule'),  {thickness:4}),
         Object.assign(makeEl('text'),  {text:'Web Bluetooth editor.\nType here, add photos, QR codes and barcodes, then hit Print.', size:22, align:'center'}),
-        Object.assign(makeEl('qr'),    {value:'https://developer.mozilla.org/docs/Web/API/Web_Bluetooth_API', size:220}),
+        Object.assign(makeEl('qr'),    {value:'https://github.com/gulp79/peripage-Web-editor', size:220}),
         Object.assign(makeEl('space'), {height:20}),
       ];
     },
