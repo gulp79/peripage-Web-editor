@@ -21,12 +21,12 @@ export const PRESETS = [
   },
   {
     id: 'filament3d',
-    name: '3D Filament',
+    name: '💿 3D Spool',
     desc: 'Spool label',
     make() {
       return [
         Object.assign(makeEl('text'), {
-          text: 'BAMBU LAB',
+          text: '💿 BAMBU LAB',
           family: "'Archivo Black'",
           size: 28, bold: true, align: 'center',
           invert: true, before: 0, after: 0,
@@ -40,14 +40,14 @@ export const PRESETS = [
         Object.assign(makeEl('text'), {
           text: 'COLOR',
           family: "'Archivo Black'",
-          size: 18, bold: false, align: 'left',
+          size: 18, bold: false, align: 'center',
           invert: false, before: 8, after: 0,
           tracking: 4,
         }),
         Object.assign(makeEl('text'), {
           text: 'DARK GREEN',
           family: "'Archivo Black'",
-          size: 42, bold: true, align: 'left',
+          size: 42, bold: true, align: 'center',
           invert: false, before: 0, after: 6,
         }),
         Object.assign(makeEl('space'), {height: 8}),
@@ -62,7 +62,7 @@ export const PRESETS = [
       return [
         Object.assign(makeEl('text'), {
           text: 'FREEZER',
-          family: "'Archivo Black'",
+          family: "'Permanent Marker'",
           size: 45, bold: true, align: 'center',
           invert: true, before: 0, after: 0,
         }),
@@ -75,13 +75,13 @@ export const PRESETS = [
         }),
         Object.assign(makeEl('text'), {
           text: 'Item Description',
-          family: "'Archivo Black'",
+          family: "'Permanent Marker'",
           size: 38, bold: true, align: 'left',
           invert: false, before: 2, after: 6,
         }),
         Object.assign(makeEl('rule'), {style:'solid', thickness:3, inset:0, before:4, after:10}),
         Object.assign(makeEl('text'), {
-          text: 'PACKAGING / EXPIRY DATE',
+          text: 'CONFEZIONATO / SCADENZA',
           family: "'Archivo Black'",
           size: 16, bold: false, align: 'left',
           invert: false, before: 0, after: 0,
@@ -89,7 +89,7 @@ export const PRESETS = [
         }),
         Object.assign(makeEl('text'), {
           text: 'DD/MM/YYYY',
-          family: "'Archivo Black'",
+          family: "'Permanent Marker'",
           size: 38, bold: true, align: 'left',
           invert: false, before: 2, after: 10,
         }),
